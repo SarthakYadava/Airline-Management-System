@@ -1,54 +1,82 @@
 const express = require('express');
 const morgan = require('morgan');
-const { createProxyMiddleware } = require('http-proxy-middleware'); 
+const cors = require('cors');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const rateLimit = require('express-rate-limit');
 const axios = require('axios');
 
+const {
+    PORT,
+    CLIENT_URL,
+    AUTH_SERVICE_URL,
+    BOOKING_SERVICE_URL,
+    FLIGHT_SERVICE_URL
+} = require('./config/serverconfig');
+
 const app = express();
-const { PORT } = require('./config/serverconfig');
 
-const setupAndStartServer = async () => {
-    
-    const limiter = rateLimit({
-        windowMs: 2* 60 * 1000,
-        max: 5, //max request a user can make
+const limiter = rateLimit({
+    windowMs: 2 * 60 * 1000,
+    limit: 100,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false
+});
+
+app.use(cors({
+    origin: CLIENT_URL,
+    credentials: true
+}));
+app.use(morgan('combined'));
+app.use(limiter);
+
+app.get('/health', (req, res) => {
+    return res.status(200).json({
+        service: 'api-gateway',
+        status: 'ok'
     });
+});
 
-    app.use(morgan('combined'));
-    app.use(limiter);
-
-    app.use('/bookingservice', async (req, res, next) =>{
-        console.log(req.headers['x-access-token']);
-        try {
-            const response = await axios.get('http://localhost:3001/api/v1/isAuthenticated', {
-                headers: {
-                    'x-access-token': req.headers['x-access-token']
-                }
-            });  
-            console.log(response.data);  
-            if(response.data.success) next();
-            else {
-                return res.status(401).json({
-                    message: 'Unauthorised'
-                });
+app.use('/bookingservice', async (req, res, next) => {
+    try {
+        const response = await axios.get(`${AUTH_SERVICE_URL}/api/v1/isAuthenticated`, {
+            headers: {
+                'x-access-token': req.headers['x-access-token']
             }
-        } 
-        catch (error) {
-            return res.status(401).json({
-                message: 'Unauthorised'
-            });
+        });
+
+        if(response.data.success) {
+            req.userId = response.data.data;
+            return next();
         }
-    });
-    
-    app.use('/bookingservice', createProxyMiddleware({ target: 'http://localhost:3002/', changeOrigin: true}));
-    app.get('/hello', (req, res) =>{
-        return res.json({message: "Ok"}); 
-    });
 
-    app.listen(PORT, () => {
-        console.log(`Server started on Port ${PORT}`);
-    });
+        return res.status(401).json({
+            success: false,
+            message: 'Authentication required'
+        });
+    }
+    catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: 'Authentication required'
+        });
+    }
+});
 
-}
+app.use('/authservice', createProxyMiddleware({
+    target: AUTH_SERVICE_URL,
+    changeOrigin: true
+}));
 
-setupAndStartServer();
+app.use('/flightservice', createProxyMiddleware({
+    target: FLIGHT_SERVICE_URL,
+    changeOrigin: true
+}));
+
+app.use('/bookingservice', createProxyMiddleware({
+    target: BOOKING_SERVICE_URL,
+    changeOrigin: true
+}));
+
+app.listen(PORT, () => {
+    console.log(`API gateway started on port ${PORT}`);
+});

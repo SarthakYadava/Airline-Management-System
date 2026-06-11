@@ -7,9 +7,12 @@ const airportService = new AirportService();
 const add = async (req, res) => {
     try {
         const airportRequestBody = {
+            code: req.body.code,
             name: req.body.name,
             address: req.body.address,
-            cityId: req.body.cityId
+            cityId: req.body.cityId,
+            latitude: req.body.latitude,
+            longitude: req.body.longitude
         }
 
         const airport = await airportService.add_Airport(airportRequestBody);
@@ -57,9 +60,12 @@ const destroy = async (req, res) => {
 const update = async (req, res) => {
     try {
         const response = await airportService.update_Airport(req.params.id, {
+            code: req.body.code,
             name: req.body.name, 
             address: req.body.address,
-            cityId: req.body.cityId
+            cityId: req.body.cityId,
+            latitude: req.body.latitude,
+            longitude: req.body.longitude
         }); //id -> req.params.id, data -> req.body
         return res.status(SuccessCodes.OK).json({
             data: response,

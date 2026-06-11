@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Airport } = require('../models/index')
+const { Airport, City } = require('../models/index')
 
 class AirportRepository{
 
@@ -32,9 +32,12 @@ class AirportRepository{
     async update_Airport(Id, data){
         try{
             const airport = await Airport.findByPk(Id);
+            if(data.code !== undefined) airport.code = data.code;
             airport.name = data.name;
             airport.address = data.address;
             airport.cityId = data.cityId;
+            if(data.latitude !== undefined) airport.latitude = data.latitude;
+            if(data.longitude !== undefined) airport.longitude = data.longitude;
             await airport.save();
             return airport; 
         }
@@ -46,7 +49,9 @@ class AirportRepository{
 
     async get_Airport(cityId){
         try{
-            const airport = await Airport.findByPk(cityId); 
+            const airport = await Airport.findByPk(cityId, {
+                include: [{ model: City, attributes: ['id', 'name'] }]
+            });
             return airport;
         }
         catch (error){
@@ -63,12 +68,15 @@ class AirportRepository{
                         name: {
                             [Op.startsWith]: filter.name
                         }
-                    }
+                    },
+                    include: [{ model: City, attributes: ['id', 'name'] }]
                 });
                 return airport;
             }
 
-            const airport = await Airport.findAll(); 
+            const airport = await Airport.findAll({
+                include: [{ model: City, attributes: ['id', 'name'] }]
+            });
             return airport;
         }
         catch (error){

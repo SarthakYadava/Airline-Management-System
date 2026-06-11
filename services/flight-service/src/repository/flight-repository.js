@@ -1,4 +1,4 @@
-const { Flights } = require('../models/index');
+const { Flights, Airport, Airplane, City } = require('../models/index');
 const { Op } = require('sequelize');
 
 class FlightRepository{
@@ -10,6 +10,11 @@ class FlightRepository{
         }
         if(data.departureAirportId) {
             filter.departureAirportId = data.departureAirportId;
+        }
+        if(data.departureDate) {
+            const start = new Date(`${data.departureDate}T00:00:00.000Z`);
+            const end = new Date(`${data.departureDate}T23:59:59.999Z`);
+            filter.departureTime = { [Op.between]: [start, end] };
         }
         // if(data.minPrice) { //it will handle only gte case
         //     Object.assign(filter, {price: {[Op.gte]: data.minPrice}}); //gte = greater than or equal to
@@ -35,7 +40,9 @@ class FlightRepository{
         if(data.maxPrice) {
             priceFilter.push({price: {[Op.lte]: data.maxPrice}});
         }
-        Object.assign(filter, {[Op.and]: priceFilter});
+        if(priceFilter.length) {
+            Object.assign(filter, {[Op.and]: priceFilter});
+        }
 
         return filter;
     }
@@ -83,7 +90,9 @@ class FlightRepository{
 
     async get_Flight(Id){
         try{
-            const flight = await Flights.findByPk(Id);
+            const flight = await Flights.findByPk(Id, {
+                include: this.#Includes()
+            });
             return flight;
         }
         catch (error){
@@ -95,8 +104,11 @@ class FlightRepository{
     async all_Flights(filter){
         try{
             const filterObject = this.#Filters(filter);
+            const sortDirection = filter.sort === 'price_desc' ? 'DESC' : 'ASC';
             const flight = await Flights.findAll({
-                where: filterObject
+                where: filterObject,
+                include: this.#Includes(),
+                order: [[filter.sort?.startsWith('price') ? 'price' : 'departureTime', sortDirection]]
             });
             return flight;
         }
@@ -104,6 +116,30 @@ class FlightRepository{
             console.log("Something went wrong in the repository layer");
             throw {error};
         }
+    }
+
+    #Includes() {
+        const airportAttributes = ['id', 'code', 'name', 'address', 'latitude', 'longitude'];
+
+        return [
+            {
+                model: Airport,
+                as: 'departureAirport',
+                attributes: airportAttributes,
+                include: [{ model: City, attributes: ['id', 'name'] }]
+            },
+            {
+                model: Airport,
+                as: 'arrivalAirport',
+                attributes: airportAttributes,
+                include: [{ model: City, attributes: ['id', 'name'] }]
+            },
+            {
+                model: Airplane,
+                as: 'airplane',
+                attributes: ['id', 'modelNumber', 'capacity']
+            }
+        ];
     }
 }
 
