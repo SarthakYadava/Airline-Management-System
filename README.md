@@ -45,7 +45,12 @@ Install all workspace dependencies:
 npm install
 ```
 
-Each service includes an `.env.example` file. Database configuration currently
-uses a local `src/config/config.json` file in the database-backed services.
-Detailed setup commands will be added as the configuration is consolidated.
+Each service includes an `.env.example` file. Copy it to `.env`, update the
+database credentials, then create and migrate each database:
 
+```bash
+npm run db:create --workspace @skyroute/flight-service
+npm run db:migrate --workspace @skyroute/flight-service
+```
+
+Use the same commands with the auth, booking, and notification workspace names.
