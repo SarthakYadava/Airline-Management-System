@@ -6,15 +6,21 @@ const { ServiceError } = require('../utils/errors');
 
 class BookingService{
 
-    constructor(){
-        this.bookingRepository = new BookingRepository();
+    constructor({
+        bookingRepository = new BookingRepository(),
+        flightClient = axios,
+        flightServicePath = FLIGHT_SERVICE_PATH
+    } = {}){
+        this.bookingRepository = bookingRepository;
+        this.flightClient = flightClient;
+        this.flightServicePath = flightServicePath;
     }
 
     async createBooking(data){
         try {
             const flightId = data.flightId;
-            const getFlightRequestURL = `${FLIGHT_SERVICE_PATH}/api/v1/flight/${flightId}`;
-            const response = await axios.get(getFlightRequestURL);
+            const getFlightRequestURL = `${this.flightServicePath}/api/v1/flight/${flightId}`;
+            const response = await this.flightClient.get(getFlightRequestURL);
             const flightData = response.data.data;
             const priceOfTheFlight = flightData.price;
             if(data.noOfSeats > flightData.totalSeats){
@@ -27,8 +33,10 @@ class BookingService{
             const totalCost = priceOfTheFlight * data.noOfSeats;
             const bookingPayload = {...data, totalCost};
             const booking = await this.bookingRepository.create(bookingPayload);
-            const updateFlightRequestURL = `${FLIGHT_SERVICE_PATH}/api/v1/flight/${booking.flightId}`;
-            await axios.patch(updateFlightRequestURL, {totalSeats: flightData.totalSeats - booking.noOfSeats});
+            const updateFlightRequestURL = `${this.flightServicePath}/api/v1/flight/${booking.flightId}`;
+            await this.flightClient.patch(updateFlightRequestURL, {
+                totalSeats: flightData.totalSeats - booking.noOfSeats
+            });
             const finalBooking = await this.bookingRepository.update(booking.id, {status: 'Booked'});
             return finalBooking;
         } 

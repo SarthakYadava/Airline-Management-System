@@ -3,9 +3,12 @@ const { compareTime } = require('../utils/helper');
 
 class FlightService{
 
-    constructor(){
-        this.airplaneRepository = new AirplaneRepository();
-        this.flightRepository = new FlightRepository();
+    constructor({
+        airplaneRepository = new AirplaneRepository(),
+        flightRepository = new FlightRepository()
+    } = {}){
+        this.airplaneRepository = airplaneRepository;
+        this.flightRepository = flightRepository;
     }
 
     async add_Flight(data){

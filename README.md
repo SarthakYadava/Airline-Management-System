@@ -54,3 +54,14 @@ npm run db:migrate --workspace @skyroute/flight-service
 ```
 
 Use the same commands with the auth, booking, and notification workspace names.
+
+## Tests
+
+Run the backend unit tests from the repository root:
+
+```bash
+npm test
+```
+
+The current suite covers authentication validation, token user lookups, flight
+schedule rules, airplane capacity, booking totals, and seat availability.
