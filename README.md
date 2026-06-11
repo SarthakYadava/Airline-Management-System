@@ -33,6 +33,8 @@ The traveler-facing frontend includes:
 - Responsive flight search with airport and date selection
 - Clear flight result cards with duration, fare, seats, and gate information
 - Route visualization generated from airport coordinates
+- Account creation and token-based sign-in
+- Protected booking review and confirmation flow
 - Premium destination, lounge, and cabin-service sections
 - Loading, empty, API fallback, and mobile navigation states
 

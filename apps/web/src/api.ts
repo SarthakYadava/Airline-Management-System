@@ -39,3 +39,46 @@ export const searchFlights = async (values: SearchValues) => {
   return payload.data;
 };
 
+export const signUp = async (email: string, password: string) => {
+  const response = await fetch(`${API_URL}/authservice/api/v1/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  return readJson<ApiResponse<{ id: number; email: string }>>(response);
+};
+
+export const signIn = async (email: string, password: string) => {
+  const response = await fetch(`${API_URL}/authservice/api/v1/signin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const payload = await readJson<ApiResponse<string>>(response);
+  return payload.data;
+};
+
+export const getCurrentUserId = async (token: string) => {
+  const response = await fetch(`${API_URL}/authservice/api/v1/isAuthenticated`, {
+    headers: { 'x-access-token': token }
+  });
+  const payload = await readJson<ApiResponse<number>>(response);
+  return payload.data;
+};
+
+export const createBooking = async (
+  token: string,
+  flightId: number,
+  noOfSeats: number
+) => {
+  const response = await fetch(`${API_URL}/bookingservice/api/v1/booking`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': token
+    },
+    body: JSON.stringify({ flightId, noOfSeats })
+  });
+  return readJson<ApiResponse<{ id: number; status: string; totalCost: number }>>(response);
+};
+

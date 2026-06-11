@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { getAirports, searchFlights } from './api';
+import AuthDialog from './AuthDialog';
+import BookingDialog from './BookingDialog';
 import { createDemoFlights, demoAirports } from './data';
 import RouteMap from './RouteMap';
 import type { Airport, Flight, SearchValues } from './types';
@@ -49,6 +51,16 @@ const getDuration = (departure: string, arrival: string) => {
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 
+const readStoredSession = () => {
+  try {
+    const stored = localStorage.getItem('skyroute-session');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem('skyroute-session');
+    return null;
+  }
+};
+
 function App() {
   const [airports, setAirports] = useState<Airport[]>(demoAirports);
   const [isPreviewData, setIsPreviewData] = useState(true);
@@ -56,6 +68,14 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [sort, setSort] = useState<'recommended' | 'price' | 'departure'>('recommended');
+  const [showAuth, setShowAuth] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [pendingFlight, setPendingFlight] = useState<Flight | null>(null);
+  const [session, setSession] = useState<{
+    token: string;
+    userId: number;
+    email: string;
+  } | null>(readStoredSession);
   const [search, setSearch] = useState<SearchValues>({
     departureAirportId: demoAirports[0].id,
     arrivalAirportId: demoAirports[1].id,
@@ -128,6 +148,38 @@ function App() {
     }));
   };
 
+  const chooseFlight = (flight: Flight) => {
+    if (!session) {
+      setPendingFlight(flight);
+      setShowAuth(true);
+      return;
+    }
+    setSelectedFlight(flight);
+  };
+
+  const handleAuthenticated = (nextSession: {
+    token: string;
+    userId: number;
+    email: string;
+  }) => {
+    localStorage.setItem('skyroute-session', JSON.stringify(nextSession));
+    setSession(nextSession);
+    setShowAuth(false);
+    if (pendingFlight) {
+      setSelectedFlight(pendingFlight);
+      setPendingFlight(null);
+    }
+  };
+
+  const handleAccount = () => {
+    if (!session) {
+      setShowAuth(true);
+      return;
+    }
+    localStorage.removeItem('skyroute-session');
+    setSession(null);
+  };
+
   return (
     <div className="site-shell">
       <header className="topbar">
@@ -153,9 +205,9 @@ function App() {
           <a href="#experience">Experience</a>
           <a href="#results">My trips</a>
         </nav>
-        <button className="account-button" type="button">
+        <button className="account-button" type="button" onClick={handleAccount}>
           <span className="account-icon">◎</span>
-          Sign in
+          {session ? 'Sign out' : 'Sign in'}
         </button>
       </header>
 
@@ -327,7 +379,7 @@ function App() {
                     <small>From</small>
                     <strong>{formatCurrency(flight.price)}</strong>
                     <em>per traveler</em>
-                    <button type="button">Select</button>
+                    <button type="button" onClick={() => chooseFlight(flight)}>Select</button>
                   </div>
                 </article>
               )) : (
@@ -422,6 +474,23 @@ function App() {
         </div>
         <p>Built as a full-stack airline services learning project.</p>
       </footer>
+      {showAuth && (
+        <AuthDialog
+          onClose={() => {
+            setShowAuth(false);
+            setPendingFlight(null);
+          }}
+          onAuthenticated={handleAuthenticated}
+        />
+      )}
+      {selectedFlight && session && (
+        <BookingDialog
+          flight={selectedFlight}
+          passengers={search.passengers}
+          token={session.token}
+          onClose={() => setSelectedFlight(null)}
+        />
+      )}
     </div>
   );
 }

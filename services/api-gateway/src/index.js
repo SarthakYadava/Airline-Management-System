@@ -46,6 +46,7 @@ app.use('/bookingservice', async (req, res, next) => {
 
         if(response.data.success) {
             req.userId = response.data.data;
+            req.headers['x-user-id'] = String(response.data.data);
             return next();
         }
 

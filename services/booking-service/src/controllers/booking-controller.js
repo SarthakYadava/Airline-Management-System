@@ -27,8 +27,12 @@ class BookingController {
 
     async create (req, res){
         try {
-            const response = await bookingService.createBooking(req.body);
-            return res.status(StatusCodes.OK).json({
+            const authenticatedUserId = Number(req.headers['x-user-id']);
+            const response = await bookingService.createBooking({
+                ...req.body,
+                userId: authenticatedUserId || req.body.userId
+            });
+            return res.status(StatusCodes.CREATED).json({
                 data: response,
                 message: 'Successfully completed booking',
                 success: true,

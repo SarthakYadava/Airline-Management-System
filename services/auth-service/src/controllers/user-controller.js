@@ -10,8 +10,10 @@ const create = async (req, res) => {
         // }
 
         const response = await userService.create_User(req.body);
+        const user = response.toJSON ? response.toJSON() : { ...response };
+        delete user.password;
         return res.status(201).json({
-            data: response,
+            data: user,
             message: 'Successfully created a new User',
             success: true,
             err: {}
