@@ -9,13 +9,13 @@ import { createDemoFlights, demoAirports } from './data';
 import RouteMap from './RouteMap';
 import type { Airport, Flight, SearchValues } from './types';
 
-import heroAircraft from './assets/travel/hero-aircraft.png';
-import dubaiImage from './assets/travel/destination-dubai.png';
-import parisImage from './assets/travel/destination-paris.png';
-import singaporeImage from './assets/travel/destination-singapore.png';
-import loungeImage from './assets/travel/lounge-story.png';
-import islandImage from './assets/travel/island-banner.png';
-import cabinCrewImage from './assets/travel/cabin-crew.png';
+import heroAircraft from './assets/travel/hero-aircraft.webp';
+import dubaiImage from './assets/travel/destination-dubai.webp';
+import parisImage from './assets/travel/destination-paris.webp';
+import singaporeImage from './assets/travel/destination-singapore.webp';
+import loungeImage from './assets/travel/lounge-story.webp';
+import islandImage from './assets/travel/island-banner.webp';
+import cabinCrewImage from './assets/travel/cabin-crew.webp';
 
 const formatDateInput = (date: Date) => date.toISOString().slice(0, 10);
 
@@ -188,6 +188,7 @@ function App() {
   };
 
   const handleTrips = () => {
+    setIsMenuOpen(false);
     if (!session) {
       setOpenTripsAfterAuth(true);
       setShowAuth(true);
@@ -210,15 +211,20 @@ function App() {
           className="menu-toggle"
           type="button"
           aria-label="Toggle navigation"
+          aria-controls="primary-navigation"
+          aria-expanded={isMenuOpen}
           onClick={() => setIsMenuOpen((open) => !open)}
         >
           <span />
           <span />
         </button>
-        <nav className={isMenuOpen ? 'nav-links nav-links-open' : 'nav-links'}>
-          <a href="#search">Book</a>
-          <a href="#destinations">Destinations</a>
-          <a href="#experience">Experience</a>
+        <nav
+          id="primary-navigation"
+          className={isMenuOpen ? 'nav-links nav-links-open' : 'nav-links'}
+        >
+          <a href="#search" onClick={() => setIsMenuOpen(false)}>Book</a>
+          <a href="#destinations" onClick={() => setIsMenuOpen(false)}>Destinations</a>
+          <a href="#experience" onClick={() => setIsMenuOpen(false)}>Experience</a>
           <button type="button" onClick={handleTrips}>My trips</button>
         </nav>
         <button className="account-button" type="button" onClick={handleAccount}>
@@ -248,10 +254,21 @@ function App() {
           <form className="search-card" onSubmit={handleSearch}>
             <div className="search-card-top">
               <div className="trip-tabs" aria-label="Trip type">
-                <button className="trip-tab trip-tab-active" type="button">
+                <button
+                  className="trip-tab"
+                  type="button"
+                  disabled
+                  title="Round-trip booking is not yet available"
+                >
                   Round trip
                 </button>
-                <button className="trip-tab" type="button">One way</button>
+                <button
+                  className="trip-tab trip-tab-active"
+                  type="button"
+                  aria-pressed="true"
+                >
+                  One way
+                </button>
               </div>
               <span className="cabin-label">Economy class</span>
             </div>
@@ -297,7 +314,7 @@ function App() {
                 </select>
                 <small>{arrival.name}</small>
               </label>
-              <label className="search-field compact-field">
+              <label className="search-field compact-field departure-field">
                 <span>Departure</span>
                 <input
                   type="date"
@@ -311,7 +328,7 @@ function App() {
                   }
                 />
               </label>
-              <label className="search-field compact-field">
+              <label className="search-field compact-field traveler-field">
                 <span>Travelers</span>
                 <select
                   value={search.passengers}

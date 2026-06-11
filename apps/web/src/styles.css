@@ -106,6 +106,7 @@ h1, h2, h3 { font-family: 'Libre Caslon Display', serif; font-weight: 400; }
 .search-card-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
 .trip-tabs { display: flex; }
 .trip-tab { position: relative; padding: 1.2rem .95rem; border: 0; color: #7b828c; background: none; font-size: .83rem; }
+.trip-tab:disabled { color: #a7acb3; cursor: not-allowed; }
 .trip-tab-active { color: var(--ink); font-weight: 700; }
 .trip-tab-active::after { content: ''; position: absolute; left: .95rem; right: .95rem; bottom: -1px; height: 3px; background: var(--burgundy); }
 .cabin-label { color: #737b86; font-size: .8rem; }
@@ -330,7 +331,9 @@ footer p { margin: 0; color: #808b99; font-size: .72rem; }
   .search-card { padding: 0 1rem 1rem; }
   .search-grid { grid-template-columns: 1fr 38px 1fr; }
   .compact-field { grid-row: auto; }
-  .search-button { grid-column: span 2; grid-row: auto; min-height: 58px; }
+  .departure-field { grid-column: 1; grid-row: 2; }
+  .traveler-field { grid-column: 3; grid-row: 2; }
+  .search-button { grid-column: 1 / -1; grid-row: 3; min-height: 58px; }
   .results-section, .destinations-section { width: calc(100% - 1.5rem); padding: 5rem 0; }
   .results-intro, .section-heading { align-items: start; flex-direction: column; }
   .flight-card { grid-template-columns: 1fr 1.5fr .8fr; }
@@ -353,7 +356,8 @@ footer p { margin: 0; color: #808b99; font-size: .72rem; }
   .cabin-label { padding: 0 .95rem 1rem; }
   .search-grid { grid-template-columns: 1fr; }
   .swap-button { margin: -.5rem auto; transform: rotate(90deg); }
-  .search-button { grid-column: auto; min-height: 56px; }
+  .departure-field, .traveler-field, .search-button { grid-column: auto; grid-row: auto; }
+  .search-button { min-height: 56px; }
   .results-controls { align-items: flex-start; flex-direction: column; width: 100%; }
   .results-controls label { width: 100%; }
   .flight-card { grid-template-columns: 1fr auto; gap: 1rem; }
