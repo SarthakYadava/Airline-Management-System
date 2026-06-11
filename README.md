@@ -4,9 +4,8 @@ SkyRoute is a learning-focused airline platform built as a collection of Node.js
 microservices. The backend covers flight inventory, user authentication,
 bookings, API routing, and email notification workflows.
 
-The project is being expanded into a full-stack portfolio application with a
-responsive web client, stronger validation, automated tests, and a simpler
-local development experience.
+The project includes a responsive React web client, stronger validation,
+automated tests, and a simplified local development experience.
 
 ## Services
 
@@ -25,6 +24,20 @@ local development experience.
 - JSON Web Tokens and bcrypt
 - RabbitMQ
 - Nodemailer
+- React, TypeScript, and Vite
+
+## Web Experience
+
+The traveler-facing frontend includes:
+
+- Responsive flight search with airport and date selection
+- Clear flight result cards with duration, fare, seats, and gate information
+- Route visualization generated from airport coordinates
+- Premium destination, lounge, and cabin-service sections
+- Loading, empty, API fallback, and mobile navigation states
+
+When the backend is unavailable, the frontend labels and displays preview data
+so the interface remains explorable without presenting it as a live response.
 
 ## Current Status
 
@@ -44,6 +57,15 @@ Install all workspace dependencies:
 ```bash
 npm install
 ```
+
+Start the web client:
+
+```bash
+npm run dev:web
+```
+
+The frontend uses `http://localhost:4000` by default. Copy
+`apps/web/.env.example` to `apps/web/.env` to use another API gateway URL.
 
 Each service includes an `.env.example` file. Copy it to `.env`, update the
 database credentials, then create and migrate each database:

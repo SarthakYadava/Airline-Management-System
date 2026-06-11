@@ -1,0 +1,41 @@
+import type { Airport, Flight, SearchValues } from './types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+type ApiResponse<T> = {
+  data: T;
+  success: boolean;
+  message: string;
+};
+
+const readJson = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+};
+
+export const getAirports = async () => {
+  const response = await fetch(`${API_URL}/flightservice/api/v1/airport`);
+  const payload = await readJson<ApiResponse<Airport[]>>(response);
+  return payload.data.map((airport) => ({
+    ...airport,
+    latitude: Number(airport.latitude),
+    longitude: Number(airport.longitude)
+  }));
+};
+
+export const searchFlights = async (values: SearchValues) => {
+  const params = new URLSearchParams({
+    departureAirportId: String(values.departureAirportId),
+    arrivalAirportId: String(values.arrivalAirportId),
+    departureDate: values.departureDate
+  });
+  const response = await fetch(
+    `${API_URL}/flightservice/api/v1/flight?${params.toString()}`
+  );
+  const payload = await readJson<ApiResponse<Flight[]>>(response);
+  return payload.data;
+};
+
