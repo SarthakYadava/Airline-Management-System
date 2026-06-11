@@ -1,0 +1,21 @@
+{
+  "name": "skyroute-airline-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A learning-focused airline booking platform built with Node.js microservices.",
+  "workspaces": [
+    "services/*"
+  ],
+  "scripts": {
+    "start:gateway": "npm run start --workspace @skyroute/api-gateway",
+    "start:auth": "npm run start --workspace @skyroute/auth-service",
+    "start:booking": "npm run start --workspace @skyroute/booking-service",
+    "start:notifications": "npm run start --workspace @skyroute/notification-service",
+    "start:flights": "npm run start --workspace @skyroute/flight-service",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
