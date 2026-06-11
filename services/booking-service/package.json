@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node --test --experimental-test-isolation=none",
+    "test": "node test/index.js",
     "db:create": "sequelize-cli db:create",
     "db:migrate": "sequelize-cli db:migrate"
   },
