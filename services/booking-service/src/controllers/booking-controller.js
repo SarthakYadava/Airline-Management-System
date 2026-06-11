@@ -49,6 +49,27 @@ class BookingController {
             });
         }
     }
+
+    async all(req, res) {
+        try {
+            const authenticatedUserId = Number(req.headers['x-user-id']);
+            const response = await bookingService.getBookings(authenticatedUserId);
+            return res.status(StatusCodes.OK).json({
+                data: response,
+                message: 'Successfully fetched bookings',
+                success: true,
+                err: {}
+            });
+        }
+        catch (error) {
+            return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+                data: [],
+                message: error.message,
+                success: false,
+                err: error.explanation
+            });
+        }
+    }
 }
 
 module.exports = BookingController;

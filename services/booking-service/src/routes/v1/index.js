@@ -12,6 +12,7 @@ router.get('/info', (req, res) =>{
     return res.json({message: "hitting the booking service through info"}); 
 });
 router.post('/booking', bookingController.create);
+router.get('/booking', bookingController.all);
 router.post('/publish', bookingController.sendMessageToQueue);
 
 module.exports = router;

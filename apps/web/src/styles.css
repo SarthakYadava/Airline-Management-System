@@ -53,8 +53,11 @@ img { display: block; width: 100%; }
 .brand strong { font-size: 1.05rem; letter-spacing: .02em; }
 .brand small { margin-top: .08rem; color: #9ea7b4; font-size: .63rem; letter-spacing: .12em; text-transform: uppercase; }
 .nav-links { justify-self: center; display: flex; align-items: center; gap: 2.25rem; }
-.nav-links a { color: #d7dce3; font-size: .86rem; transition: color .2s; }
-.nav-links a:hover { color: var(--white); }
+.nav-links a, .nav-links button {
+  border: 0; padding: 0; color: #d7dce3; background: transparent;
+  font-size: .86rem; transition: color .2s;
+}
+.nav-links a:hover, .nav-links button:hover { color: var(--white); }
 .account-button {
   border: 1px solid #3b4656; border-radius: 999px; padding: .65rem 1rem;
   color: var(--white); background: transparent; display: flex; gap: .55rem; align-items: center;
@@ -281,6 +284,23 @@ footer p { margin: 0; color: #808b99; font-size: .72rem; }
   width: 64px; height: 64px; margin: 0 auto 1.4rem; display: grid; place-items: center;
   border-radius: 50%; color: #fff; background: #50785b; font-size: 1.8rem;
 }
+.trips-dialog { width: min(680px, 100%); }
+.trips-loading, .trips-empty { padding: 3rem 1rem; color: var(--muted); text-align: center; }
+.trips-empty { display: grid; gap: .4rem; }
+.trips-empty p { margin: 0; }
+.trip-list { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.trip-item {
+  display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; padding: 1.1rem;
+  border: 1px solid var(--line); background: #faf9f6;
+}
+.trip-item > div { display: grid; gap: .28rem; }
+.trip-item > div:last-child { justify-items: end; }
+.trip-item span, .trip-item small { color: var(--muted); font-size: .7rem; }
+.trip-item em { font-style: normal; }
+.trip-status { padding: .25rem .45rem; border-radius: 999px; font-size: .63rem; font-weight: 700; }
+.status-booked { color: #40644a; background: #e4f0e6; }
+.status-inprocess { color: #7a602d; background: #f5ead4; }
+.status-cancelled { color: #852633; background: #f8e5e8; }
 
 @media (max-width: 1100px) {
   .search-grid { grid-template-columns: 1fr 38px 1fr 1fr; }

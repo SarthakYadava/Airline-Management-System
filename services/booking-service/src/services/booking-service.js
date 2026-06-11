@@ -50,6 +50,10 @@ class BookingService{
             );
         }
     }
+
+    async getBookings(userId) {
+        return this.bookingRepository.getByUser(userId);
+    }
 }
 
 module.exports = BookingService;

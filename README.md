@@ -35,6 +35,7 @@ The traveler-facing frontend includes:
 - Route visualization generated from airport coordinates
 - Account creation and token-based sign-in
 - Protected booking review and confirmation flow
+- Authenticated booking history with status and fare summaries
 - Premium destination, lounge, and cabin-service sections
 - Loading, empty, API fallback, and mobile navigation states
 

@@ -89,3 +89,15 @@ test('rejects bookings that request more seats than available', async () => {
     assert.equal(createCalled, false);
 });
 
+test('returns bookings for the authenticated user', async () => {
+    const bookingRepository = {
+        async getByUser(userId) {
+            return [{ id: 9, userId, status: 'Booked' }];
+        }
+    };
+    const service = new BookingService({ bookingRepository });
+
+    const bookings = await service.getBookings(44);
+
+    assert.deepEqual(bookings, [{ id: 9, userId: 44, status: 'Booked' }]);
+});

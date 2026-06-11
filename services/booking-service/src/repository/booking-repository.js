@@ -52,6 +52,23 @@ class BookingRepository {
             );
         }
     }
+
+    async getByUser(userId) {
+        try {
+            return await Booking.findAll({
+                where: { userId },
+                order: [['createdAt', 'DESC']]
+            });
+        }
+        catch (error) {
+            throw new AppError(
+                'RepositoryError',
+                'Cannot fetch bookings',
+                'There was an issue loading the bookings',
+                StatusCodes.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
 
 module.exports = BookingRepository;

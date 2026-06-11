@@ -40,3 +40,12 @@ export type SearchValues = {
   passengers: number;
 };
 
+export type Booking = {
+  id: number;
+  flightId: number;
+  userId: number;
+  status: 'InProcess' | 'Booked' | 'Cancelled';
+  noOfSeats: number;
+  totalCost: number;
+  createdAt: string;
+};

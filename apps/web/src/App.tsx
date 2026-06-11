@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { getAirports, searchFlights } from './api';
 import AuthDialog from './AuthDialog';
 import BookingDialog from './BookingDialog';
+import TripsDialog from './TripsDialog';
 import { createDemoFlights, demoAirports } from './data';
 import RouteMap from './RouteMap';
 import type { Airport, Flight, SearchValues } from './types';
@@ -69,6 +70,8 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [sort, setSort] = useState<'recommended' | 'price' | 'departure'>('recommended');
   const [showAuth, setShowAuth] = useState(false);
+  const [showTrips, setShowTrips] = useState(false);
+  const [openTripsAfterAuth, setOpenTripsAfterAuth] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [pendingFlight, setPendingFlight] = useState<Flight | null>(null);
   const [session, setSession] = useState<{
@@ -169,6 +172,10 @@ function App() {
       setSelectedFlight(pendingFlight);
       setPendingFlight(null);
     }
+    if (openTripsAfterAuth) {
+      setShowTrips(true);
+      setOpenTripsAfterAuth(false);
+    }
   };
 
   const handleAccount = () => {
@@ -178,6 +185,15 @@ function App() {
     }
     localStorage.removeItem('skyroute-session');
     setSession(null);
+  };
+
+  const handleTrips = () => {
+    if (!session) {
+      setOpenTripsAfterAuth(true);
+      setShowAuth(true);
+      return;
+    }
+    setShowTrips(true);
   };
 
   return (
@@ -203,7 +219,7 @@ function App() {
           <a href="#search">Book</a>
           <a href="#destinations">Destinations</a>
           <a href="#experience">Experience</a>
-          <a href="#results">My trips</a>
+          <button type="button" onClick={handleTrips}>My trips</button>
         </nav>
         <button className="account-button" type="button" onClick={handleAccount}>
           <span className="account-icon">◎</span>
@@ -479,6 +495,7 @@ function App() {
           onClose={() => {
             setShowAuth(false);
             setPendingFlight(null);
+            setOpenTripsAfterAuth(false);
           }}
           onAuthenticated={handleAuthenticated}
         />
@@ -490,6 +507,9 @@ function App() {
           token={session.token}
           onClose={() => setSelectedFlight(null)}
         />
+      )}
+      {showTrips && session && (
+        <TripsDialog token={session.token} onClose={() => setShowTrips(false)} />
       )}
     </div>
   );

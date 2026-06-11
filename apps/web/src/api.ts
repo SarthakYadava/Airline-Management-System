@@ -1,4 +1,4 @@
-import type { Airport, Flight, SearchValues } from './types';
+import type { Airport, Booking, Flight, SearchValues } from './types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -80,5 +80,13 @@ export const createBooking = async (
     body: JSON.stringify({ flightId, noOfSeats })
   });
   return readJson<ApiResponse<{ id: number; status: string; totalCost: number }>>(response);
+};
+
+export const getBookings = async (token: string) => {
+  const response = await fetch(`${API_URL}/bookingservice/api/v1/booking`, {
+    headers: { 'x-access-token': token }
+  });
+  const payload = await readJson<ApiResponse<Booking[]>>(response);
+  return payload.data;
 };
 
