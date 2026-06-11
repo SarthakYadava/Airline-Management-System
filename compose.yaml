@@ -45,6 +45,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_flights
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-skyroute-local-service-token}
     depends_on:
       mysql:
         condition: service_healthy
@@ -83,6 +84,7 @@ services:
       PORT: 3002
       DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_bookings
       FLIGHT_SERVICE_PATH: http://flight-service:3000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-skyroute-local-service-token}
       EXCHANGE_NAME: skyroute
       REMINDER_BINDING_KEY: notification
       MESSAGE_BROKER_URL: amqp://${RABBITMQ_USER:-skyroute}:${RABBITMQ_PASSWORD:-skyroute-local}@rabbitmq:5672

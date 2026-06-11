@@ -78,6 +78,32 @@ const update = async (req, res) => {
     }
 }
 
+const changeSeatInventory = async (req, res) => {
+    try {
+        const response = await flightService.changeSeatInventory(
+            req.params.id,
+            req.body.action,
+            req.body.seats
+        );
+        return res.status(SuccessCodes.OK).json({
+            data: response,
+            success: true,
+            message: req.body.action === 'reserve'
+                ? 'Successfully reserved seats'
+                : 'Successfully released seats',
+            err: {}
+        });
+    }
+    catch (error) {
+        return res.status(error.statusCode || 500).json({
+            data: {},
+            success: false,
+            message: error.message || 'Not able to update seat inventory',
+            err: {}
+        });
+    }
+}
+
 //GET method -> url -> /flight/:id
 const get = async (req, res) => {
     try {
@@ -125,6 +151,7 @@ module.exports = {
     add,
     destroy,
     update,
+    changeSeatInventory,
     get,
     all
 }

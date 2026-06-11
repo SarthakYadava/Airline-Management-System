@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const { BookingRepository } = require('../repository/index');
-const { FLIGHT_SERVICE_PATH } = require('../config/ServerConfig');
+const { FLIGHT_SERVICE_PATH, INTERNAL_SERVICE_TOKEN } = require('../config/ServerConfig');
 const { ServiceError } = require('../utils/errors');
 
 class BookingService{
@@ -17,32 +17,49 @@ class BookingService{
     }
 
     async createBooking(data){
+        const seatInventoryURL = `${this.flightServicePath}/api/v1/flight/${data.flightId}/seats`;
+        const requestConfig = {
+            headers: {
+                'x-internal-service-token': INTERNAL_SERVICE_TOKEN
+            }
+        };
+        let seatsReserved = false;
         try {
-            const flightId = data.flightId;
-            const getFlightRequestURL = `${this.flightServicePath}/api/v1/flight/${flightId}`;
-            const response = await this.flightClient.get(getFlightRequestURL);
+            const response = await this.flightClient.patch(seatInventoryURL, {
+                action: 'reserve',
+                seats: data.noOfSeats
+            }, requestConfig);
+            seatsReserved = true;
             const flightData = response.data.data;
             const priceOfTheFlight = flightData.price;
-            if(data.noOfSeats > flightData.totalSeats){
-                throw new ServiceError(
-                    'Insufficient seats',
-                    'The requested number of seats is not available',
-                    409
-                );
-            }
             const totalCost = priceOfTheFlight * data.noOfSeats;
-            const bookingPayload = {...data, totalCost};
-            const booking = await this.bookingRepository.create(bookingPayload);
-            const updateFlightRequestURL = `${this.flightServicePath}/api/v1/flight/${booking.flightId}`;
-            await this.flightClient.patch(updateFlightRequestURL, {
-                totalSeats: flightData.totalSeats - booking.noOfSeats
+            return await this.bookingRepository.create({
+                ...data,
+                totalCost,
+                status: 'Booked'
             });
-            const finalBooking = await this.bookingRepository.update(booking.id, {status: 'Booked'});
-            return finalBooking;
         } 
         catch (error) {
+            if(seatsReserved) {
+                try {
+                    await this.flightClient.patch(seatInventoryURL, {
+                        action: 'release',
+                        seats: data.noOfSeats
+                    }, requestConfig);
+                }
+                catch (releaseError) {
+                    console.error('Unable to release reserved seats', releaseError.message);
+                }
+            }
             if(['RepositoryError', 'ValidationError', 'ServiceError'].includes(error.name)){
                 throw error;
+            }
+            if(error.response) {
+                throw new ServiceError(
+                    error.response.data?.message || 'Unable to reserve seats',
+                    error.response.data?.err || 'The flight inventory request failed',
+                    error.response.status
+                );
             }
             throw new ServiceError(
                 'Unable to complete booking',

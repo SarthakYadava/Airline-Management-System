@@ -50,6 +50,25 @@ class FlightService{
         }
     }
 
+    async changeSeatInventory(Id, action, seatCount) {
+        const result = action === 'reserve'
+            ? await this.flightRepository.reserveSeats(Id, seatCount)
+            : await this.flightRepository.releaseSeats(Id, seatCount);
+
+        if(result.status === 'not_found') {
+            const error = new Error('Flight not found');
+            error.statusCode = 404;
+            throw error;
+        }
+        if(result.status === 'insufficient') {
+            const error = new Error('Insufficient seats');
+            error.statusCode = 409;
+            throw error;
+        }
+
+        return result.flight;
+    }
+
     async get_Flight(Id){
         try{
             const flight = await this.flightRepository.get_Flight(Id);

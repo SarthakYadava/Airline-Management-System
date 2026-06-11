@@ -88,6 +88,43 @@ class FlightRepository{
         }
     }
 
+    async reserveSeats(Id, seatCount) {
+        return Flights.sequelize.transaction(async (transaction) => {
+            const flight = await Flights.findByPk(Id, {
+                transaction,
+                lock: transaction.LOCK.UPDATE
+            });
+
+            if(!flight) {
+                return { status: 'not_found' };
+            }
+            if(flight.totalSeats < seatCount) {
+                return { status: 'insufficient', flight };
+            }
+
+            flight.totalSeats -= seatCount;
+            await flight.save({ transaction });
+            return { status: 'reserved', flight };
+        });
+    }
+
+    async releaseSeats(Id, seatCount) {
+        return Flights.sequelize.transaction(async (transaction) => {
+            const flight = await Flights.findByPk(Id, {
+                transaction,
+                lock: transaction.LOCK.UPDATE
+            });
+
+            if(!flight) {
+                return { status: 'not_found' };
+            }
+
+            flight.totalSeats += seatCount;
+            await flight.save({ transaction });
+            return { status: 'released', flight };
+        });
+    }
+
     async get_Flight(Id){
         try{
             const flight = await Flights.findByPk(Id, {

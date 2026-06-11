@@ -3,36 +3,29 @@ const assert = require('node:assert/strict');
 
 const BookingService = require('../src/services/booking-service');
 
-test('creates a booking and reduces available seats', async () => {
+test('creates a booking after reserving seats', async () => {
     const calls = {
         created: null,
-        patched: null,
-        updated: null
+        inventory: []
     };
     const bookingRepository = {
         async create(data) {
             calls.created = data;
             return { id: 7, ...data };
-        },
-        async update(id, data) {
-            calls.updated = { id, data };
-            return { id, status: data.status };
         }
     };
     const flightClient = {
-        async get() {
+        async patch(url, data, config) {
+            calls.inventory.push({ url, data, config });
             return {
                 data: {
                     data: {
                         id: 3,
                         price: 4500,
-                        totalSeats: 12
+                        totalSeats: 10
                     }
                 }
             };
-        },
-        async patch(url, data) {
-            calls.patched = { url, data };
         }
     };
     const service = new BookingService({
@@ -48,18 +41,19 @@ test('creates a booking and reduces available seats', async () => {
     });
 
     assert.equal(calls.created.totalCost, 9000);
-    assert.deepEqual(calls.patched, {
-        url: 'http://flights.test/api/v1/flight/3',
-        data: { totalSeats: 10 }
+    assert.equal(calls.created.status, 'Booked');
+    assert.deepEqual(calls.inventory[0].data, {
+        action: 'reserve',
+        seats: 2
     });
-    assert.deepEqual(calls.updated, {
-        id: 7,
-        data: { status: 'Booked' }
-    });
+    assert.equal(
+        calls.inventory[0].config.headers['x-internal-service-token'],
+        'skyroute-local-service-token'
+    );
     assert.equal(booking.status, 'Booked');
 });
 
-test('rejects bookings that request more seats than available', async () => {
+test('preserves inventory conflicts returned by the flight service', async () => {
     let createCalled = false;
     const service = new BookingService({
         bookingRepository: {
@@ -68,15 +62,16 @@ test('rejects bookings that request more seats than available', async () => {
             }
         },
         flightClient: {
-            async get() {
-                return {
+            async patch() {
+                const error = new Error('Request failed');
+                error.response = {
+                    status: 409,
                     data: {
-                        data: {
-                            price: 4500,
-                            totalSeats: 1
-                        }
+                        message: 'Insufficient seats',
+                        err: 'The requested number of seats is not available'
                     }
                 };
+                throw error;
             }
         },
         flightServicePath: 'http://flights.test'
@@ -87,6 +82,49 @@ test('rejects bookings that request more seats than available', async () => {
         (error) => error.statusCode === 409 && error.message === 'Insufficient seats'
     );
     assert.equal(createCalled, false);
+});
+
+test('releases seats when booking persistence fails', async () => {
+    const inventoryCalls = [];
+    const service = new BookingService({
+        bookingRepository: {
+            async create() {
+                const error = new Error('Database unavailable');
+                error.name = 'RepositoryError';
+                throw error;
+            }
+        },
+        flightClient: {
+            async patch(url, data) {
+                inventoryCalls.push({ url, data });
+                return {
+                    data: {
+                        data: {
+                            id: 3,
+                            price: 4500,
+                            totalSeats: data.action === 'reserve' ? 10 : 12
+                        }
+                    }
+                };
+            }
+        },
+        flightServicePath: 'http://flights.test'
+    });
+
+    await assert.rejects(
+        service.createBooking({ flightId: 3, userId: 11, noOfSeats: 2 }),
+        (error) => error.name === 'RepositoryError'
+    );
+    assert.deepEqual(inventoryCalls, [
+        {
+            url: 'http://flights.test/api/v1/flight/3/seats',
+            data: { action: 'reserve', seats: 2 }
+        },
+        {
+            url: 'http://flights.test/api/v1/flight/3/seats',
+            data: { action: 'release', seats: 2 }
+        }
+    ]);
 });
 
 test('returns bookings for the authenticated user', async () => {

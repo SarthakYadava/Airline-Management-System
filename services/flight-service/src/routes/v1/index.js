@@ -35,6 +35,7 @@ router.post('/flight', FlightMiddlewares.validate_add, FlightController.add);
 router.delete('/flight/:id', FlightController.destroy);
 router.get('/flight/:id', FlightController.get);
 router.get('/flight', FlightController.all);
+router.patch('/flight/:id/seats', FlightMiddlewares.validate_seat_inventory, FlightController.changeSeatInventory);
 router.patch('/flight/:id', FlightMiddlewares.validate_update, FlightController.update);
 
 module.exports = router;

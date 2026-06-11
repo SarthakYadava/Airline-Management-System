@@ -54,3 +54,39 @@ test('rejects flights that arrive before departure', async () => {
     assert.equal(airplaneLookupCalled, false);
 });
 
+test('reserves seats through the inventory repository', async () => {
+    let reservation = null;
+    const service = new FlightService({
+        airplaneRepository: {},
+        flightRepository: {
+            async reserveSeats(id, seats) {
+                reservation = { id, seats };
+                return {
+                    status: 'reserved',
+                    flight: { id, totalSeats: 7, price: 5200 }
+                };
+            }
+        }
+    });
+
+    const flight = await service.changeSeatInventory(4, 'reserve', 3);
+
+    assert.deepEqual(reservation, { id: 4, seats: 3 });
+    assert.equal(flight.totalSeats, 7);
+});
+
+test('rejects a seat reservation when inventory is insufficient', async () => {
+    const service = new FlightService({
+        airplaneRepository: {},
+        flightRepository: {
+            async reserveSeats() {
+                return { status: 'insufficient', flight: { totalSeats: 1 } };
+            }
+        }
+    });
+
+    await assert.rejects(
+        service.changeSeatInventory(4, 'reserve', 3),
+        (error) => error.statusCode === 409 && error.message === 'Insufficient seats'
+    );
+});
