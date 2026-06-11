@@ -1,53 +1,49 @@
 const { FlightRepository, AirplaneRepository } = require('../repository/index');
 const { compareTime } = require('../utils/helper');
+const { createHttpError } = require('../utils/http-responses');
 
-class FlightService{
-
+class FlightService {
     constructor({
         airplaneRepository = new AirplaneRepository(),
         flightRepository = new FlightRepository()
-    } = {}){
+    } = {}) {
         this.airplaneRepository = airplaneRepository;
         this.flightRepository = flightRepository;
     }
 
-    async add_Flight(data){
-        try {
-            if(!compareTime(data.arrivalTime, data.departureTime)){
-                throw {error: 'Arrival Time cannot be less than Departure Time'}
-            }
-            const airplane = await this.airplaneRepository.get_Airplane(data.airplaneId);
-            const flight = await this.flightRepository.add_Flight({
-                ...data, totalSeats: airplane.capacity
-            })
-            return flight;
-        } 
-        catch (error) {
-            console.log("Something went wrong at service layer");
-            throw{error};
+    async add_Flight(data) {
+        if(!compareTime(data.arrivalTime, data.departureTime)) {
+            throw createHttpError(
+                400,
+                'Arrival time must be after departure time'
+            );
         }
+
+        const airplane = await this.airplaneRepository.get_Airplane(data.airplaneId);
+        if(!airplane) {
+            throw createHttpError(404, 'Airplane not found');
+        }
+
+        return this.flightRepository.add_Flight({
+            ...data,
+            totalSeats: airplane.capacity
+        });
     }
 
-    async delete_Flight(Id){
-        try{
-            const response = await this.flightRepository.delete_Flight(Id);
-            return response;
+    async delete_Flight(Id) {
+        const response = await this.flightRepository.delete_Flight(Id);
+        if(!response) {
+            throw createHttpError(404, 'Flight not found');
         }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+        return true;
     }
 
-    async update_Flight(Id, data){
-        try{
-            const response = await this.flightRepository.update_Flight(Id, data);
-            return response;
+    async update_Flight(Id, data) {
+        const response = await this.flightRepository.update_Flight(Id, data);
+        if(!response) {
+            throw createHttpError(404, 'Flight not found');
         }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+        return true;
     }
 
     async changeSeatInventory(Id, action, seatCount) {
@@ -56,41 +52,30 @@ class FlightService{
             : await this.flightRepository.releaseSeats(Id, seatCount);
 
         if(result.status === 'not_found') {
-            const error = new Error('Flight not found');
-            error.statusCode = 404;
-            throw error;
+            throw createHttpError(404, 'Flight not found');
         }
         if(result.status === 'insufficient') {
-            const error = new Error('Insufficient seats');
-            error.statusCode = 409;
-            throw error;
+            throw createHttpError(
+                409,
+                'Insufficient seats',
+                'The requested number of seats is not available'
+            );
         }
 
         return result.flight;
     }
 
-    async get_Flight(Id){
-        try{
-            const flight = await this.flightRepository.get_Flight(Id);
-            return flight;
+    async get_Flight(Id) {
+        const flight = await this.flightRepository.get_Flight(Id);
+        if(!flight) {
+            throw createHttpError(404, 'Flight not found');
         }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+        return flight;
     }
 
-    async all_Flights(data){
-        try {
-            const flights = await this.flightRepository.all_Flights(data);
-            return flights;
-        } 
-        catch (error) {
-            console.log("Something went wrong at service layer");
-            throw{error};
-        }
+    async all_Flights(data) {
+        return this.flightRepository.all_Flights(data);
     }
-
 }
 
 module.exports = FlightService;

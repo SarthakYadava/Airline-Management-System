@@ -60,12 +60,12 @@ class FlightRepository{
 
     async delete_Flight(Id){
         try{
-            await Flights.destroy({
+            const deletedRows = await Flights.destroy({
                 where: { 
                     id: Id
                 }
             });
-            return true;
+            return deletedRows > 0;
         }
         catch (error){
             console.log("Something went wrong in the repository layer");
@@ -75,12 +75,12 @@ class FlightRepository{
 
     async update_Flight(Id, data){
         try{
-            await Flights.update(data, {
+            const [updatedRows] = await Flights.update(data, {
                 where: {
                     id: Id
                 }
             });
-            return true; 
+            return updatedRows > 0;
         }
         catch (error){
             console.log("Something went wrong in the repository layer");

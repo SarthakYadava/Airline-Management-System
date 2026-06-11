@@ -1,11 +1,15 @@
 const { FlightService } = require('../services/index');
 const { SuccessCodes } = require('../utils/error-codes');
+const {
+    sendError,
+    sendSuccess
+} = require('../utils/http-responses');
 
 const flightService = new FlightService();
 
 const add = async (req, res) => {
     try {
-        const flightRequestData = {
+        const flight = await flightService.add_Flight({
             flightNumber: req.body.flightNumber,
             airplaneId: req.body.airplaneId,
             departureAirportId: req.body.departureAirportId,
@@ -13,70 +17,33 @@ const add = async (req, res) => {
             arrivalTime: req.body.arrivalTime,
             departureTime: req.body.departureTime,
             price: req.body.price
-        }
-
-        const flight = await flightService.add_Flight(flightRequestData);
-        return res.status(SuccessCodes.CREATED).json({
-            data: flight, 
-            success: true,
-            message: "Successfully added an Flight",
-            err: {}
         });
+        return sendSuccess(res, SuccessCodes.CREATED, flight, 'Successfully added a flight');
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to add a Flight",
-            err: error
-        });
+        return sendError(res, error, 'Not able to add a flight');
     }
-}
+};
 
-//DELETE method -> url ->  /flight/:id
 const destroy = async (req, res) => {
     try {
         const response = await flightService.delete_Flight(req.params.id);
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully deleted a Flight",
-            err: {}
-        });
+        return sendSuccess(res, SuccessCodes.OK, response, 'Successfully deleted a flight');
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to delete the Flight",
-            err: error
-        });
+        return sendError(res, error, 'Not able to delete the flight');
     }
-}
+};
 
-//PATCH method -> url -> /flight/:id
 const update = async (req, res) => {
     try {
-        const response = await flightService.update_Flight(req.params.id, req.body); //id -> req.params.id, data -> req.body
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully updated a flight",
-            err: {}
-        });
+        const response = await flightService.update_Flight(req.params.id, req.body);
+        return sendSuccess(res, SuccessCodes.OK, response, 'Successfully updated a flight');
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to update a flight",
-            err: error
-        });
+        return sendError(res, error, 'Not able to update the flight');
     }
-}
+};
 
 const changeSeatInventory = async (req, res) => {
     try {
@@ -85,67 +52,35 @@ const changeSeatInventory = async (req, res) => {
             req.body.action,
             req.body.seats
         );
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: req.body.action === 'reserve'
-                ? 'Successfully reserved seats'
-                : 'Successfully released seats',
-            err: {}
-        });
+        const message = req.body.action === 'reserve'
+            ? 'Successfully reserved seats'
+            : 'Successfully released seats';
+        return sendSuccess(res, SuccessCodes.OK, response, message);
     }
     catch (error) {
-        return res.status(error.statusCode || 500).json({
-            data: {},
-            success: false,
-            message: error.message || 'Not able to update seat inventory',
-            err: {}
-        });
+        return sendError(res, error, 'Not able to update seat inventory');
     }
-}
+};
 
-//GET method -> url -> /flight/:id
 const get = async (req, res) => {
     try {
         const response = await flightService.get_Flight(req.params.id);
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully fetched a Flight",
-            err: {}
-        });
+        return sendSuccess(res, SuccessCodes.OK, response, 'Successfully fetched a flight');
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to get a Flight",
-            err: error
-        });
+        return sendError(res, error, 'Not able to get the flight');
     }
-}
+};
 
-const all = async (req, res)  => {
+const all = async (req, res) => {
     try {
         const response = await flightService.all_Flights(req.query);
-        return res.status(SuccessCodes.OK).json({
-            data: response, 
-            success: true,
-            message: "Successfully fetched the Flights",
-            err: {}
-        });
+        return sendSuccess(res, SuccessCodes.OK, response, 'Successfully fetched flights');
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to fetch the Flights",
-            err: error
-        });
+        return sendError(res, error, 'Not able to fetch flights');
     }
-}
+};
 
 module.exports = {
     add,
@@ -154,4 +89,4 @@ module.exports = {
     changeSeatInventory,
     get,
     all
-}
+};

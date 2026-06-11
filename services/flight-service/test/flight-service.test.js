@@ -90,3 +90,20 @@ test('rejects a seat reservation when inventory is insufficient', async () => {
         (error) => error.statusCode === 409 && error.message === 'Insufficient seats'
     );
 });
+
+test('returns a not found error when a flight does not exist', async () => {
+    const service = new FlightService({
+        airplaneRepository: {},
+        flightRepository: {
+            async get_Flight() {
+                return null;
+            }
+        }
+    });
+
+    await assert.rejects(
+        service.get_Flight(99),
+        (error) => error.statusCode === 404 &&
+            error.message === 'Flight not found'
+    );
+});
