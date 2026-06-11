@@ -4,9 +4,12 @@
   "private": true,
   "description": "A learning-focused airline booking platform built with Node.js microservices.",
   "workspaces": [
+    "apps/*",
     "services/*"
   ],
   "scripts": {
+    "dev:web": "npm run dev --workspace @skyroute/web",
+    "build:web": "npm run build --workspace @skyroute/web",
     "start:gateway": "npm run start --workspace @skyroute/api-gateway",
     "start:auth": "npm run start --workspace @skyroute/auth-service",
     "start:booking": "npm run start --workspace @skyroute/booking-service",
@@ -18,4 +21,3 @@
     "node": ">=20"
   }
 }
-
