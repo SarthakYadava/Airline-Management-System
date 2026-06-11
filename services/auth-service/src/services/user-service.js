@@ -53,7 +53,7 @@ class UserService{
             if(!response){
                 throw {error: 'Invalid token'}
             }
-            const user = this.userRepository.get_User(response.id);
+            const user = await this.userRepository.get_User(response.id);
             if(!user){
                 throw {error: 'No user with the corresponding token exists'}
             }
@@ -108,9 +108,9 @@ class UserService{
         }
     }
 
-    is_Admin(userId){
+    async is_Admin(userId){
         try {
-            return this.userRepository.is_Admin(userId);
+            return await this.userRepository.is_Admin(userId);
         } 
         catch (error) {
             console.log("Something went wrong in service layer");

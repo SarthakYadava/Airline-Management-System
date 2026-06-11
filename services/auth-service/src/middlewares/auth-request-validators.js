@@ -2,7 +2,7 @@ const validateUserAuth = (req, res, next) => {
     if(!req.body.email || !req.body.password) {
         return res.status(400).json({
             data: {},
-            success: true,
+            success: false,
             message: 'Something went wrong',
             err: 'Email or password missing in the request'
         });
@@ -15,7 +15,7 @@ const validateIsAdminRequest = (req, res, next) => {
     if(!req.body.id) {
         return res.status(400).json({
             data: {},
-            success: true,
+            success: false,
             message: 'User id not given',
             err: 'Something went wrong'
         });

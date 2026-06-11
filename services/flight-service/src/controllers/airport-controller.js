@@ -6,13 +6,13 @@ const airportService = new AirportService();
 
 const add = async (req, res) => {
     try {
-        const airportRquestBody = {
+        const airportRequestBody = {
             name: req.body.name,
             address: req.body.address,
             cityId: req.body.cityId
         }
 
-        const airport = await airportService.add_Airport(req.airportRquestBody);
+        const airport = await airportService.add_Airport(airportRequestBody);
         return res.status(SuccessCodes.CREATED).json({
             data: airport, 
             success: true,

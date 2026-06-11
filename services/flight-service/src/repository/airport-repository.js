@@ -3,9 +3,9 @@ const { Airport } = require('../models/index')
 
 class AirportRepository{
 
-    async add_Airport(name , address , cityId){ 
+    async add_Airport(data){
         try{
-            const airport = await Airport.create(name , address , cityId);
+            const airport = await Airport.create(data);
             return airport;
         }
         catch (error){

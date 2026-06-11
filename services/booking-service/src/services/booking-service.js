@@ -16,9 +16,13 @@ class BookingService{
             const getFlightRequestURL = `${FLIGHT_SERVICE_PATH}/api/v1/flight/${flightId}`;
             const response = await axios.get(getFlightRequestURL);
             const flightData = response.data.data;
-            let priceOfTheFlight = flightData.price;
+            const priceOfTheFlight = flightData.price;
             if(data.noOfSeats > flightData.totalSeats){
-                throw new ServiceError('Something went wrong in the booking process' || 'Insufficient seats in the flight')
+                throw new ServiceError(
+                    'Insufficient seats',
+                    'The requested number of seats is not available',
+                    409
+                );
             }
             const totalCost = priceOfTheFlight * data.noOfSeats;
             const bookingPayload = {...data, totalCost};
@@ -29,10 +33,13 @@ class BookingService{
             return finalBooking;
         } 
         catch (error) {
-            if(error.name == 'ReposiotryError' || error.name == 'ValidationError'){
+            if(['RepositoryError', 'ValidationError', 'ServiceError'].includes(error.name)){
                 throw error;
             }
-            throw new ServiceError();   
+            throw new ServiceError(
+                'Unable to complete booking',
+                error.message || 'The booking workflow failed'
+            );
         }
     }
 }

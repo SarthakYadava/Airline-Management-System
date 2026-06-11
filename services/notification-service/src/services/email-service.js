@@ -4,7 +4,7 @@ const TicketRepository = require('../repository/ticket-repository');
 const ticketRepository = new TicketRepository()
 
 const sendBasicEmail = (mailFrom, mailTo, mailSubject, mailBody) => {
-    sender.sendMail({
+    return sender.sendMail({
         from: mailFrom,
         to: mailTo,
         subject: mailSubject,
@@ -18,7 +18,7 @@ const fetchPendingEmails = async (timestamp) => {
         return response;
     } 
     catch (error) {
-        console.log(error);    
+        throw error;
     }
 }
 
@@ -28,7 +28,7 @@ const updateTicket = async (ticketId, data) => {
         return response;
     } 
     catch (error) {
-        console.log(error);    
+        throw error;
     }
 }
 
@@ -38,7 +38,7 @@ const createNotifications = async (data) => {
         return response;
     } 
     catch (error) {
-        console.log(error);    
+        throw error;
     }
 }
 

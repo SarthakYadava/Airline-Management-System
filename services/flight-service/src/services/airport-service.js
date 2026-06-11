@@ -6,9 +6,9 @@ class AirportService{
         this.airportRepository = new AirportRepository();
     }
 
-    async add_Airport(name , address , cityId){ 
+    async add_Airport(data){
         try{
-            const airport = await this.airportRepository.add_Airport(name , address , cityId);
+            const airport = await this.airportRepository.add_Airport(data);
             return airport;
         }
         catch (error){

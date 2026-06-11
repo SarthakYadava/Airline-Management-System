@@ -98,7 +98,7 @@ const get = async (req, res) => {
 const allcities = async (req, res) => {
     try {
         const cities = await cityService.allCity(req.query);
-        return res.status(SuccessCodes.Ok).json({
+        return res.status(SuccessCodes.OK).json({
             data: cities,
             success: true,
             message: "Successfully fetched all cities",

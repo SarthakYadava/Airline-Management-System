@@ -11,7 +11,7 @@ class BookingRepository {
             return booking;
         } 
         catch (error) {
-            if(error.name = 'SequelizeValidationError') {
+            if(error.name === 'SequelizeValidationError') {
                 throw new ValidationError(error);
             }
             throw new AppError(
@@ -26,6 +26,14 @@ class BookingRepository {
     async update(bookingId, data) {
         try {
             const booking = await Booking.findByPk(bookingId);
+            if(!booking) {
+                throw new AppError(
+                    'RepositoryError',
+                    'Booking not found',
+                    `No booking exists with id ${bookingId}`,
+                    StatusCodes.NOT_FOUND
+                );
+            }
             if(data.status) {
                 booking.status = data.status;
             }
@@ -33,6 +41,9 @@ class BookingRepository {
             return booking;
         } 
         catch (error) {
+            if(error instanceof AppError) {
+                throw error;
+            }
             throw new AppError(
                 'RepositoryError',
                 'Cannot update Booking',

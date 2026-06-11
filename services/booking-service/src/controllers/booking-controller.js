@@ -37,7 +37,7 @@ class BookingController {
         } 
         catch (error) {
             console.log(error);
-            return res.status(error.statusCode).json({
+            return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
                 data: {},
                 message: error.message,
                 success: false,

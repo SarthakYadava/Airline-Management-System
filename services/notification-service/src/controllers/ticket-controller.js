@@ -11,10 +11,10 @@ const create = async (req, res) => {
         });
     } 
     catch (error) {
-        return res.status(201).json({
+        return res.status(500).json({
             data: {},
-            message: 'unable to register an email reminder',
-            success: true,
+            message: 'Unable to register an email reminder',
+            success: false,
             err: error
         });
                 
