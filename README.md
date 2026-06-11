@@ -80,6 +80,15 @@ npm run db:migrate --workspace @skyroute/flight-service
 
 Use the same commands with the auth, booking, and notification workspace names.
 
+## Containers And Deployment
+
+The repository includes production Dockerfiles, a complete local Compose stack,
+database migrations, demo seed data, health checks, Nginx SPA hosting, and CI
+container builds.
+
+For the container setup and production environment variables, see
+[DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Tests
 
 Run the backend unit tests from the repository root:

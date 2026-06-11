@@ -1,0 +1,171 @@
+name: skyroute
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-skyroute-root}
+      MYSQL_USER: ${MYSQL_USER:-skyroute}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-skyroute-local}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init-databases.sh:/docker-entrypoint-initdb.d/01-init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-skyroute}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-skyroute-local}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  flight-service:
+    build:
+      context: .
+      dockerfile: services/flight-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_flights
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_auth
+      JWT_KEY: ${JWT_KEY:-change-this-local-jwt-key}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: services/booking-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_bookings
+      FLIGHT_SERVICE_PATH: http://flight-service:3000
+      EXCHANGE_NAME: skyroute
+      REMINDER_BINDING_KEY: notification
+      MESSAGE_BROKER_URL: amqp://${RABBITMQ_USER:-skyroute}:${RABBITMQ_PASSWORD:-skyroute-local}@rabbitmq:5672
+    depends_on:
+      mysql:
+        condition: service_healthy
+      flight-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_notifications
+      EXCHANGE_NAME: skyroute
+      REMINDER_BINDING_KEY: notification
+      MESSAGE_BROKER_URL: amqp://${RABBITMQ_USER:-skyroute}:${RABBITMQ_PASSWORD:-skyroute-local}@rabbitmq:5672
+      BROKER_RETRY_MS: 5000
+      EMAIL_ID: ${EMAIL_ID:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3003/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080}
+      CLIENT_URLS: ${CLIENT_URLS:-http://localhost:8080}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      BOOKING_SERVICE_URL: http://booking-service:3002
+      FLIGHT_SERVICE_URL: http://flight-service:3000
+    ports:
+      - "${API_PORT:-4000}:4000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      booking-service:
+        condition: service_healthy
+      flight-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${PUBLIC_API_URL:-http://localhost:4000}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  rabbitmq-data:

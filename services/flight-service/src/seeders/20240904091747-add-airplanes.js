@@ -43,11 +43,8 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    await queryInterface.bulkDelete('Airplanes', {
+      modelNumber: ['Boeing 737', 'Airbus A320', 'Boeing 777', 'Boeing 747', 'Airbus A330']
+    }, {});
   }
 };

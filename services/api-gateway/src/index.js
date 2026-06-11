@@ -7,13 +7,14 @@ const axios = require('axios');
 
 const {
     PORT,
-    CLIENT_URL,
+    CLIENT_URLS,
     AUTH_SERVICE_URL,
     BOOKING_SERVICE_URL,
     FLIGHT_SERVICE_URL
 } = require('./config/serverconfig');
 
 const app = express();
+app.set('trust proxy', 1);
 
 const limiter = rateLimit({
     windowMs: 2 * 60 * 1000,
@@ -23,7 +24,12 @@ const limiter = rateLimit({
 });
 
 app.use(cors({
-    origin: CLIENT_URL,
+    origin(origin, callback) {
+        if(!origin || CLIENT_URLS.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Origin is not allowed'));
+    },
     credentials: true
 }));
 app.use(morgan('combined'));

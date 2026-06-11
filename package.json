@@ -10,6 +10,10 @@
   "scripts": {
     "dev:web": "npm run dev --workspace @skyroute/web",
     "build:web": "npm run build --workspace @skyroute/web",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:seed": "docker compose exec auth-service npm run db:seed && docker compose exec flight-service npm run db:seed",
     "start:gateway": "npm run start --workspace @skyroute/api-gateway",
     "start:auth": "npm run start --workspace @skyroute/auth-service",
     "start:booking": "npm run start --workspace @skyroute/booking-service",

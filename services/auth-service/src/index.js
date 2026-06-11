@@ -14,6 +14,16 @@ const prepareAndStartServer = () => {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: true}));
 
+    app.get('/health', async (req, res) => {
+        try {
+            await db.sequelize.authenticate();
+            return res.status(200).json({ service: 'auth-service', status: 'ok' });
+        }
+        catch (error) {
+            return res.status(503).json({ service: 'auth-service', status: 'unavailable' });
+        }
+    });
+
     app.use('/api', apiRoutes);
     
     app.listen(PORT, async () => {

@@ -16,29 +16,26 @@ module.exports = {
     await queryInterface.bulkInsert('Roles', [
       {
         name: 'ADMIN',
-        createdAT: new Date(),
-        updatedAT: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'CUSTOMER',
-        createdAT: new Date(),
-        updatedAT: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'AIRLINE_BUSINESS',
-        createdAT: new Date(),
-        updatedAT: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
 
     ], {});
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    await queryInterface.bulkDelete('Roles', {
+      name: ['ADMIN', 'CUSTOMER', 'AIRLINE_BUSINESS']
+    }, {});
   }
 };
