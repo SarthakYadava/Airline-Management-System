@@ -16,12 +16,12 @@ class AirportRepository{
 
     async delete_Airport(cityId){
         try{
-            await Airport.destroy({
+            const deletedRows = await Airport.destroy({
                 where: { 
                     id: cityId
                 }
             });
-            return true;
+            return deletedRows > 0;
         }
         catch (error){
             console.log("Something went wrong in the repository layer");
@@ -32,6 +32,7 @@ class AirportRepository{
     async update_Airport(Id, data){
         try{
             const airport = await Airport.findByPk(Id);
+            if(!airport) return null;
             if(data.code !== undefined) airport.code = data.code;
             airport.name = data.name;
             airport.address = data.address;

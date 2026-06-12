@@ -16,12 +16,12 @@ class AirplaneRepository{
 
     async delete_Airplane(Id){
         try{
-            await Airplane.destroy({
+            const deletedRows = await Airplane.destroy({
                 where: { 
                     id: Id
                 }
             });
-            return true;
+            return deletedRows > 0;
         }
         catch (error){
             console.log("Something went wrong in the repository layer");
@@ -32,6 +32,7 @@ class AirplaneRepository{
     async update_Airplane(Id, data){
         try{
             const airplane = await Airplane.findByPk(Id);
+            if(!airplane) return null;
             airplane.modelNumber = data.modelNumber;
             airplane.capacity = data.capacity;
             await airplane.save();

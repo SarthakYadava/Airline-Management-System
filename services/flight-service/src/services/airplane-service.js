@@ -1,67 +1,36 @@
 const { AirplaneRepository } = require('../repository/index');
+const { createHttpError } = require('../utils/http-responses');
 
-class AirplaneService{
-
-    constructor(){
-        this.airplaneRepository = new AirplaneRepository();
+class AirplaneService {
+    constructor({ airplaneRepository = new AirplaneRepository() } = {}) {
+        this.airplaneRepository = airplaneRepository;
     }
 
-    async add_Airplane(data){ 
-        try{
-            const airplane = await this.airplaneRepository.add_Airplane(data);
-            return airplane;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async add_Airplane(data) {
+        return this.airplaneRepository.add_Airplane(data);
     }
 
-    async delete_Airplane(Id){
-        try{
-            const response = await this.airplaneRepository.delete_Airplane(Id);
-            return response;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async delete_Airplane(id) {
+        const deleted = await this.airplaneRepository.delete_Airplane(id);
+        if(!deleted) throw createHttpError(404, 'Aircraft not found');
+        return true;
     }
 
-    async update_Airplane(Id, data){
-        try{
-            const airplane = await this.airplaneRepository.update_Airplane(Id, data);
-            return airplane;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async update_Airplane(id, data) {
+        const airplane = await this.airplaneRepository.update_Airplane(id, data);
+        if(!airplane) throw createHttpError(404, 'Aircraft not found');
+        return airplane;
     }
 
-    async get_Airplane(Id){
-        try{
-            const airplane = await this.airplaneRepository.get_Airplane(Id);
-            return airplane;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async get_Airplane(id) {
+        const airplane = await this.airplaneRepository.get_Airplane(id);
+        if(!airplane) throw createHttpError(404, 'Aircraft not found');
+        return airplane;
     }
 
-    async all_Airplane(filter){
-        try{
-            const airplane = await this.airplaneRepository.all_Airplane({modelNumber: filter.modelNumber});
-            return airplane;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async all_Airplane(filter) {
+        return this.airplaneRepository.all_Airplane({ modelNumber: filter.modelNumber });
     }
-
 }
 
 module.exports = AirplaneService;
-

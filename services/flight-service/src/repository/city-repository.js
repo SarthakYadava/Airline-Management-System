@@ -28,12 +28,12 @@ class CityRepository{
 
     async deleteCity(cityId){
         try{
-            await City.destroy({
+            const deletedRows = await City.destroy({
                 where: { //where cluase
                     id: cityId
                 }
             });
-            return true;
+            return deletedRows > 0;
         }
         catch (error){
             console.log("Something went wrong in the repository layer");
@@ -51,6 +51,7 @@ class CityRepository{
 
             //for getting updated data in mysql we use the below approach else above is also fine,
             const city = await City.findByPk(cityId);
+            if(!city) return null;
             city.name = data.name;
             await city.save();
             return city; 

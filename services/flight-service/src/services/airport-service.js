@@ -1,67 +1,36 @@
 const { AirportRepository } = require('../repository/index');
+const { createHttpError } = require('../utils/http-responses');
 
-class AirportService{
-
-    constructor(){
-        this.airportRepository = new AirportRepository();
+class AirportService {
+    constructor({ airportRepository = new AirportRepository() } = {}) {
+        this.airportRepository = airportRepository;
     }
 
-    async add_Airport(data){
-        try{
-            const airport = await this.airportRepository.add_Airport(data);
-            return airport;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async add_Airport(data) {
+        return this.airportRepository.add_Airport(data);
     }
 
-    async delete_Airport(cityId){
-        try{
-            const response = await this.airportRepository.delete_Airport(cityId);
-            return response;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async delete_Airport(id) {
+        const deleted = await this.airportRepository.delete_Airport(id);
+        if(!deleted) throw createHttpError(404, 'Airport not found');
+        return true;
     }
 
-    async update_Airport(Id, data){
-        try{
-            const airport = await this.airportRepository.update_Airport(Id, data);
-            return airport;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async update_Airport(id, data) {
+        const airport = await this.airportRepository.update_Airport(id, data);
+        if(!airport) throw createHttpError(404, 'Airport not found');
+        return airport;
     }
 
-    async get_Airport(cityId){
-        try{
-            const airport = await this.airportRepository.get_Airport(cityId);
-            return airport;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async get_Airport(id) {
+        const airport = await this.airportRepository.get_Airport(id);
+        if(!airport) throw createHttpError(404, 'Airport not found');
+        return airport;
     }
 
-    async all_Airport(filter){
-        try{
-            const airports = await this.airportRepository.all_Airport({name: filter.name});
-            return airports;
-        }
-        catch (error){
-            console.log("Something went wrong in the repository layer");
-            throw {error};
-        }
+    async all_Airport(filter) {
+        return this.airportRepository.all_Airport({ name: filter.name });
     }
-
 }
 
 module.exports = AirportService;
-

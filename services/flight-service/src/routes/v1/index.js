@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { FlightMiddlewares } = require('../../middlewares/index');
+const { FlightMiddlewares, ManagementMiddlewares } = require('../../middlewares/index');
 
 const CityController = require('../../controllers/city-controller');
 const AirportController = require('../../controllers/airport-controller');
@@ -10,25 +10,25 @@ const FlightController = require('../../controllers/flight-controller');
 const router = express.Router();
 
 //city
-router.post('/city', CityController.create);
-router.delete('/city/:id', CityController.destroy);
-router.get('/city/:id', CityController.get);
+router.post('/city', ManagementMiddlewares.validateCity, CityController.create);
+router.delete('/city/:id', ManagementMiddlewares.validateResourceId, CityController.destroy);
+router.get('/city/:id', ManagementMiddlewares.validateResourceId, CityController.get);
 router.get('/city', CityController.allcities);
-router.patch('/city/:id', CityController.update);
+router.patch('/city/:id', ManagementMiddlewares.validateResourceId, ManagementMiddlewares.validateCity, CityController.update);
 
 //airport
-router.post('/airport', AirportController.add);
-router.delete('/airport/:id', AirportController.destroy);
-router.get('/airport/:id', AirportController.get);
+router.post('/airport', ManagementMiddlewares.validateAirport, AirportController.add);
+router.delete('/airport/:id', ManagementMiddlewares.validateResourceId, AirportController.destroy);
+router.get('/airport/:id', ManagementMiddlewares.validateResourceId, AirportController.get);
 router.get('/airport', AirportController.all);
-router.patch('/airport/:id', AirportController.update);
+router.patch('/airport/:id', ManagementMiddlewares.validateResourceId, ManagementMiddlewares.validateAirport, AirportController.update);
 
 //airplane
-router.post('/airplane', AirplaneController.add);
-router.delete('/airplane/:id', AirplaneController.destroy);
-router.get('/airplane/:id', AirplaneController.get);
+router.post('/airplane', ManagementMiddlewares.validateAirplane, AirplaneController.add);
+router.delete('/airplane/:id', ManagementMiddlewares.validateResourceId, AirplaneController.destroy);
+router.get('/airplane/:id', ManagementMiddlewares.validateResourceId, AirplaneController.get);
 router.get('/airplane', AirplaneController.all);
-router.patch('/airplane/:id', AirplaneController.update);
+router.patch('/airplane/:id', ManagementMiddlewares.validateResourceId, ManagementMiddlewares.validateAirplane, AirplaneController.update);
 
 //flight
 router.post('/flight', FlightMiddlewares.validate_add, FlightController.add);

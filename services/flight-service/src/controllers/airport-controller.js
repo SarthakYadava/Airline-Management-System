@@ -1,137 +1,77 @@
 const { AirportService } = require('../services/index');
 const { SuccessCodes } = require('../utils/error-codes');
-
+const { sendError, sendSuccess } = require('../utils/http-responses');
 
 const airportService = new AirportService();
 
 const add = async (req, res) => {
     try {
-        const airportRequestBody = {
-            code: req.body.code,
-            name: req.body.name,
-            address: req.body.address,
-            cityId: req.body.cityId,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude
-        }
-
-        const airport = await airportService.add_Airport(airportRequestBody);
-        return res.status(SuccessCodes.CREATED).json({
-            data: airport, 
-            success: true,
-            message: "Successfully added an Airport",
-            err: {}
-        });
+        return sendSuccess(
+            res,
+            SuccessCodes.CREATED,
+            await airportService.add_Airport(req.body),
+            'Successfully added an airport'
+        );
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to add a Airport",
-            err: error
-        });
+        return sendError(res, error, 'Not able to add an airport');
     }
-}
+};
 
-//DELETE method -> url ->  /airport/:id
 const destroy = async (req, res) => {
     try {
-        const response = await airportService.delete_Airport(req.params.id);
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully deleted an airport",
-            err: {}
-        });
+        return sendSuccess(
+            res,
+            SuccessCodes.OK,
+            await airportService.delete_Airport(req.params.id),
+            'Successfully deleted an airport'
+        );
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to delete the airport",
-            err: error
-        });
+        return sendError(res, error, 'Not able to delete the airport');
     }
-}
+};
 
-//PATCH method -> url -> /airport/:id
 const update = async (req, res) => {
     try {
-        const response = await airportService.update_Airport(req.params.id, {
-            code: req.body.code,
-            name: req.body.name, 
-            address: req.body.address,
-            cityId: req.body.cityId,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude
-        }); //id -> req.params.id, data -> req.body
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully updated an airport",
-            err: {}
-        });
+        return sendSuccess(
+            res,
+            SuccessCodes.OK,
+            await airportService.update_Airport(req.params.id, req.body),
+            'Successfully updated an airport'
+        );
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to update an airport",
-            err: error
-        });
+        return sendError(res, error, 'Not able to update the airport');
     }
-}
+};
 
-//GET method -> url -> /airport/:id
 const get = async (req, res) => {
     try {
-        const response = await airportService.get_Airport(req.params.id);
-        return res.status(SuccessCodes.OK).json({
-            data: response,
-            success: true,
-            message: "Successfully fetched an airport",
-            err: {}
-        });
+        return sendSuccess(
+            res,
+            SuccessCodes.OK,
+            await airportService.get_Airport(req.params.id),
+            'Successfully fetched an airport'
+        );
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to get an airport",
-            err: error
-        });
+        return sendError(res, error, 'Not able to get the airport');
     }
-}
+};
 
 const all = async (req, res) => {
     try {
-        const airport = await airportService.all_Airport(req.query);
-        return res.status(SuccessCodes.OK).json({
-            data: airport,
-            success: true,
-            message: "Successfully fetched all airport",
-            err: {}
-        });
+        return sendSuccess(
+            res,
+            SuccessCodes.OK,
+            await airportService.all_Airport(req.query),
+            'Successfully fetched airports'
+        );
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: "Not able to fetch the airport",
-            err: error
-        });
+        return sendError(res, error, 'Not able to fetch airports');
     }
-}
+};
 
-module.exports = {
-    add,
-    destroy,
-    update,
-    get,
-    all
-}
+module.exports = { add, destroy, update, get, all };
