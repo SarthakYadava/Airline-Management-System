@@ -17,6 +17,19 @@ export type Airplane = {
   capacity: number;
 };
 
+export type City = {
+  id: number;
+  name: string;
+};
+
+export type Session = {
+  token: string;
+  userId: number;
+  email: string;
+  roles: string[];
+  isAdmin: boolean;
+};
+
 export type Flight = {
   id: number;
   flightNumber: string;

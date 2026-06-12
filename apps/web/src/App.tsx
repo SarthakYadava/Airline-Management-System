@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { getAirports, searchFlights } from './api';
+import AdminDashboard from './AdminDashboard';
 import AuthDialog from './AuthDialog';
 import BookingDialog from './BookingDialog';
 import TripsDialog from './TripsDialog';
 import { createDemoFlights, demoAirports } from './data';
 import RouteMap from './RouteMap';
-import type { Airport, Flight, SearchValues } from './types';
+import type { Airport, Flight, SearchValues, Session } from './types';
 
 import heroAircraft from './assets/travel/hero-aircraft.webp';
 import dubaiImage from './assets/travel/destination-dubai.webp';
@@ -55,7 +56,16 @@ tomorrow.setDate(tomorrow.getDate() + 1);
 const readStoredSession = () => {
   try {
     const stored = localStorage.getItem('skyroute-session');
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    const session = JSON.parse(stored) as Partial<Session>;
+    if (!session.token || !session.userId || !session.email) return null;
+    return {
+      token: session.token,
+      userId: session.userId,
+      email: session.email,
+      roles: session.roles || [],
+      isAdmin: Boolean(session.isAdmin)
+    } satisfies Session;
   } catch {
     localStorage.removeItem('skyroute-session');
     return null;
@@ -71,14 +81,11 @@ function App() {
   const [sort, setSort] = useState<'recommended' | 'price' | 'departure'>('recommended');
   const [showAuth, setShowAuth] = useState(false);
   const [showTrips, setShowTrips] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [openTripsAfterAuth, setOpenTripsAfterAuth] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [pendingFlight, setPendingFlight] = useState<Flight | null>(null);
-  const [session, setSession] = useState<{
-    token: string;
-    userId: number;
-    email: string;
-  } | null>(readStoredSession);
+  const [session, setSession] = useState<Session | null>(readStoredSession);
   const [search, setSearch] = useState<SearchValues>({
     departureAirportId: demoAirports[0].id,
     arrivalAirportId: demoAirports[1].id,
@@ -160,11 +167,7 @@ function App() {
     setSelectedFlight(flight);
   };
 
-  const handleAuthenticated = (nextSession: {
-    token: string;
-    userId: number;
-    email: string;
-  }) => {
+  const handleAuthenticated = (nextSession: Session) => {
     localStorage.setItem('skyroute-session', JSON.stringify(nextSession));
     setSession(nextSession);
     setShowAuth(false);
@@ -185,6 +188,7 @@ function App() {
     }
     localStorage.removeItem('skyroute-session');
     setSession(null);
+    setShowAdmin(false);
   };
 
   const handleTrips = () => {
@@ -196,6 +200,10 @@ function App() {
     }
     setShowTrips(true);
   };
+
+  if (session?.isAdmin && showAdmin) {
+    return <AdminDashboard session={session} onClose={() => setShowAdmin(false)} />;
+  }
 
   return (
     <div className="site-shell">
@@ -226,6 +234,17 @@ function App() {
           <a href="#destinations" onClick={() => setIsMenuOpen(false)}>Destinations</a>
           <a href="#experience" onClick={() => setIsMenuOpen(false)}>Experience</a>
           <button type="button" onClick={handleTrips}>My trips</button>
+          {session?.isAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuOpen(false);
+                setShowAdmin(true);
+              }}
+            >
+              Manage
+            </button>
+          )}
         </nav>
         <button className="account-button" type="button" onClick={handleAccount}>
           <span className="account-icon">◎</span>

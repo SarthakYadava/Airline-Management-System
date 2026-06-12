@@ -9,7 +9,8 @@
     "test": "node test/index.js",
     "db:create": "sequelize-cli db:create",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:seed": "sequelize-cli db:seed:all"
+    "db:seed": "sequelize-cli db:seed:all",
+    "admin:create": "node src/scripts/create-admin.js"
   },
   "license": "ISC",
   "dependencies": {

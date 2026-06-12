@@ -2,8 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
-    validateUserAuth,
-    validateIsAdminRequest
+    validateUserAuth
 } = require('../src/middlewares/auth-request-validators');
 
 const createResponse = () => {
@@ -51,14 +50,5 @@ test('accepts sign-in requests with email and password', () => {
 
     assert.equal(response.statusCode, null);
     assert.equal(nextCalled, true);
-});
-
-test('rejects admin checks without a user id', () => {
-    const response = createResponse();
-
-    validateIsAdminRequest({ body: {} }, response, () => {});
-
-    assert.equal(response.statusCode, 400);
-    assert.equal(response.body.success, false);
 });
 

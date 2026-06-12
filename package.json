@@ -16,6 +16,7 @@
     "docker:seed": "docker compose exec auth-service npm run db:seed && docker compose exec flight-service npm run db:seed",
     "start:gateway": "npm run start --workspace @skyroute/api-gateway",
     "start:auth": "npm run start --workspace @skyroute/auth-service",
+    "admin:create": "npm run admin:create --workspace @skyroute/auth-service",
     "start:booking": "npm run start --workspace @skyroute/booking-service",
     "start:notifications": "npm run start --workspace @skyroute/notification-service",
     "start:flights": "npm run start --workspace @skyroute/flight-service",

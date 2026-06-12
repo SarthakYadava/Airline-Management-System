@@ -36,16 +36,12 @@ The traveler-facing frontend includes:
 - Account creation and token-based sign-in
 - Protected booking review and confirmation flow
 - Authenticated booking history with status and fare summaries
+- Protected management dashboard for cities, airports, aircraft, and flights
 - Premium destination, lounge, and cabin-service sections
 - Loading, empty, API fallback, and mobile navigation states
 
 When the backend is unavailable, the frontend labels and displays preview data
 so the interface remains explorable without presenting it as a live response.
-
-## Current Status
-
-The backend has been imported into a single workspace. Setup automation,
-backend fixes, tests, and the frontend are being added incrementally.
 
 ## Local Setup
 
@@ -80,6 +76,26 @@ npm run db:migrate --workspace @skyroute/flight-service
 
 Use the same commands with the auth, booking, and notification workspace names.
 
+Create an administrator after migrating the auth database:
+
+```bash
+set ADMIN_EMAIL=admin@example.com
+set ADMIN_PASSWORD=choose-a-strong-password
+npm run admin:create
+```
+
+In PowerShell, use `$env:ADMIN_EMAIL` and `$env:ADMIN_PASSWORD` instead. Sign in
+with that account and select **Manage** in the navigation. The API gateway
+verifies the token and administrator role before allowing any inventory write.
+
+The management dashboard includes:
+
+- Network summary counts
+- City, airport, and aircraft create/edit/delete workflows
+- Flight scheduling and editing
+- Responsive tables and validated forms
+- Admin-only API mutations derived from the authenticated token
+
 ## Containers And Deployment
 
 The repository includes production Dockerfiles, a complete local Compose stack,
@@ -97,5 +113,6 @@ Run the backend unit tests from the repository root:
 npm test
 ```
 
-The current suite covers authentication validation, token user lookups, flight
-schedule rules, airplane capacity, booking totals, and seat availability.
+The current suite covers authentication and role sessions, request validation,
+flight schedule rules, pagination, API errors, airplane capacity, booking
+totals, and race-safe seat availability.

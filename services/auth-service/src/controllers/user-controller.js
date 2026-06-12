@@ -73,23 +73,22 @@ const isAuthenticated = async (req, res) => {
     }
 }
 
-const is_Admin = async (req, res) => {
-    try{
-        const response = await userService.is_Admin(req.body.id);
+const session = async (req, res) => {
+    try {
+        const response = await userService.getSession(req.headers['x-access-token']);
         return res.status(200).json({
             data: response,
-            message: 'Successfully fetched whether user is admin or not',
+            message: 'Successfully fetched the authenticated session',
             success: true,
             err: {}
         });
     }
     catch (error) {
-        console.log(error);
-        return res.status(500).json({
+        return res.status(error.statusCode || 401).json({
             data: {},
-            message: 'Something Went Wrong',
+            message: 'Authentication required',
             success: false,
-            err: error
+            err: {}
         });
     }
 }
@@ -98,5 +97,5 @@ module.exports = {
     create,
     signIn,
     isAuthenticated,
-    is_Admin
+    session
 }

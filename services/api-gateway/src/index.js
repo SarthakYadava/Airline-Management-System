@@ -42,29 +42,53 @@ app.get('/health', (req, res) => {
     });
 });
 
+const getAuthenticatedSession = async (req) => {
+    const response = await axios.get(`${AUTH_SERVICE_URL}/api/v1/session`, {
+        headers: {
+            'x-access-token': req.headers['x-access-token']
+        }
+    });
+    return response.data.data;
+};
+
 app.use('/bookingservice', async (req, res, next) => {
     try {
-        const response = await axios.get(`${AUTH_SERVICE_URL}/api/v1/isAuthenticated`, {
-            headers: {
-                'x-access-token': req.headers['x-access-token']
-            }
-        });
-
-        if(response.data.success) {
-            req.userId = response.data.data;
-            req.headers['x-user-id'] = String(response.data.data);
-            return next();
-        }
-
-        return res.status(401).json({
-            success: false,
-            message: 'Authentication required'
-        });
+        const session = await getAuthenticatedSession(req);
+        req.headers['x-user-id'] = String(session.id);
+        return next();
     }
     catch (error) {
         return res.status(401).json({
             success: false,
             message: 'Authentication required'
+        });
+    }
+});
+
+app.use('/flightservice', async (req, res, next) => {
+    if(['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+        return next();
+    }
+
+    try {
+        const session = await getAuthenticatedSession(req);
+        if(!session.isAdmin) {
+            return res.status(403).json({
+                data: {},
+                success: false,
+                message: 'Administrator access is required',
+                err: {}
+            });
+        }
+        req.headers['x-user-id'] = String(session.id);
+        return next();
+    }
+    catch (error) {
+        return res.status(401).json({
+            data: {},
+            success: false,
+            message: 'Authentication required',
+            err: {}
         });
     }
 });

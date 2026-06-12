@@ -65,6 +65,24 @@ class UserService{
         }
     }
 
+    async getSession(token) {
+        const payload = this.verifyToken(token);
+        const user = await this.userRepository.getSessionUser(payload.id);
+        if(!user) {
+            const error = new Error('Authenticated user no longer exists');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        const roles = (user.Roles || []).map((role) => role.name);
+        return {
+            id: user.id,
+            email: user.email,
+            roles,
+            isAdmin: roles.includes('ADMIN')
+        };
+    }
+
     async get_User(userId){
         try {
             const user = await this.userRepository.get_User(userId);
@@ -104,16 +122,6 @@ class UserService{
         } 
         catch (error) {
             console.log("Something went wrong in password comparison");
-            throw {error};    
-        }
-    }
-
-    async is_Admin(userId){
-        try {
-            return await this.userRepository.is_Admin(userId);
-        } 
-        catch (error) {
-            console.log("Something went wrong in service layer");
             throw {error};    
         }
     }

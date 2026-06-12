@@ -1,4 +1,12 @@
-import type { Airport, Booking, Flight, SearchValues } from './types';
+import type {
+  Airplane,
+  Airport,
+  Booking,
+  City,
+  Flight,
+  SearchValues,
+  Session
+} from './types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -18,7 +26,8 @@ type ApiResponse<T> = {
 
 const readJson = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    const payload = await response.json().catch(() => null) as { message?: string } | null;
+    throw new Error(payload?.message || `Request failed with status ${response.status}`);
   }
 
   return response.json() as Promise<T>;
@@ -66,12 +75,20 @@ export const signIn = async (email: string, password: string) => {
   return payload.data;
 };
 
-export const getCurrentUserId = async (token: string) => {
-  const response = await fetch(`${API_URL}/authservice/api/v1/isAuthenticated`, {
+export const getSession = async (token: string): Promise<Session> => {
+  const response = await fetch(`${API_URL}/authservice/api/v1/session`, {
     headers: { 'x-access-token': token }
   });
-  const payload = await readJson<ApiResponse<number>>(response);
-  return payload.data;
+  const payload = await readJson<ApiResponse<Omit<Session, 'token' | 'userId'> & { id: number }>>(
+    response
+  );
+  return {
+    token,
+    userId: payload.data.id,
+    email: payload.data.email,
+    roles: payload.data.roles,
+    isAdmin: payload.data.isAdmin
+  };
 };
 
 export const createBooking = async (
@@ -96,4 +113,64 @@ export const getBookings = async (token: string) => {
   });
   const payload = await readJson<ApiResponse<Booking[]>>(response);
   return payload.data;
+};
+
+export const getCities = async () => {
+  const response = await fetch(`${API_URL}/flightservice/api/v1/city`);
+  const payload = await readJson<ApiResponse<City[]>>(response);
+  return payload.data;
+};
+
+export const getAirplanes = async () => {
+  const response = await fetch(`${API_URL}/flightservice/api/v1/airplane`);
+  const payload = await readJson<ApiResponse<Airplane[]>>(response);
+  return payload.data;
+};
+
+export const getAdminFlights = async () => {
+  const params = new URLSearchParams({
+    page: '1',
+    limit: '50',
+    sort: 'departure_asc'
+  });
+  const response = await fetch(
+    `${API_URL}/flightservice/api/v1/flight?${params.toString()}`
+  );
+  const payload = await readJson<ApiResponse<Flight[]>>(response);
+  return payload.data;
+};
+
+type AdminResource = 'city' | 'airport' | 'airplane' | 'flight';
+
+export const saveAdminResource = async <T>(
+  token: string,
+  resource: AdminResource,
+  data: Record<string, unknown>,
+  id?: number
+) => {
+  const response = await fetch(
+    `${API_URL}/flightservice/api/v1/${resource}${id ? `/${id}` : ''}`,
+    {
+      method: id ? 'PATCH' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token
+      },
+      body: JSON.stringify(data)
+    }
+  );
+  const payload = await readJson<ApiResponse<T>>(response);
+  return payload.data;
+};
+
+export const deleteAdminResource = async (
+  token: string,
+  resource: AdminResource,
+  id: number
+) => {
+  const response = await fetch(`${API_URL}/flightservice/api/v1/${resource}/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-access-token': token }
+  });
+  return readJson<ApiResponse<boolean>>(response);
 };

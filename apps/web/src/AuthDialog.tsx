@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
-import { getCurrentUserId, signIn, signUp } from './api';
+import { getSession, signIn, signUp } from './api';
+import type { Session } from './types';
 
 type AuthDialogProps = {
   onClose: () => void;
-  onAuthenticated: (session: { token: string; userId: number; email: string }) => void;
+  onAuthenticated: (session: Session) => void;
 };
 
 function AuthDialog({ onClose, onAuthenticated }: AuthDialogProps) {
@@ -25,8 +26,7 @@ function AuthDialog({ onClose, onAuthenticated }: AuthDialogProps) {
         await signUp(email, password);
       }
       const token = await signIn(email, password);
-      const userId = await getCurrentUserId(token);
-      onAuthenticated({ token, userId, email });
+      onAuthenticated(await getSession(token));
     } catch {
       setError(
         mode === 'signup'
