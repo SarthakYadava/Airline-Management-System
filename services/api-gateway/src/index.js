@@ -55,6 +55,7 @@ app.use('/bookingservice', async (req, res, next) => {
     try {
         const session = await getAuthenticatedSession(req);
         req.headers['x-user-id'] = String(session.id);
+        req.headers['x-user-email'] = session.email;
         return next();
     }
     catch (error) {

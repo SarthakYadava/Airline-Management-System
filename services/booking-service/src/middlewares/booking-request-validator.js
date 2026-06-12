@@ -13,6 +13,7 @@ const validateAuthenticatedUser = (req, res, next) => {
     }
 
     req.authenticatedUserId = userId;
+    req.authenticatedUserEmail = req.headers['x-user-email'];
     next();
 };
 

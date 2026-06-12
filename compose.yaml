@@ -113,6 +113,7 @@ services:
       PORT: 3003
       DATABASE_URL: mysql://${MYSQL_USER:-skyroute}:${MYSQL_PASSWORD:-skyroute-local}@mysql:3306/skyroute_notifications
       EXCHANGE_NAME: skyroute
+      QUEUE_NAME: skyroute.notifications
       REMINDER_BINDING_KEY: notification
       MESSAGE_BROKER_URL: amqp://${RABBITMQ_USER:-skyroute}:${RABBITMQ_PASSWORD:-skyroute-local}@rabbitmq:5672
       BROKER_RETRY_MS: 5000

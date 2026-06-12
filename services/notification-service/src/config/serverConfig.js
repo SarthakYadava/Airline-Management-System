@@ -10,8 +10,9 @@ module.exports = {
     PORT: process.env.PORT || 3003,
     EMAIL_ID: process.env.EMAIL_ID,
     EMAIL_PASS: process.env.EMAIL_PASS,
-    EXCHANGE_NAME: process.env.EXCHANGE_NAME,
-    REMINDER_BINDING_KEY: process.env.REMINDER_BINDING_KEY,
-    MESSAGE_BROKER_URL: process.env.MESSAGE_BROKER_URL,
+    EXCHANGE_NAME: process.env.EXCHANGE_NAME || 'skyroute',
+    QUEUE_NAME: process.env.QUEUE_NAME || 'skyroute.notifications',
+    REMINDER_BINDING_KEY: process.env.REMINDER_BINDING_KEY || 'notification',
+    MESSAGE_BROKER_URL: process.env.MESSAGE_BROKER_URL || 'amqp://localhost',
     BROKER_RETRY_MS: Number(process.env.BROKER_RETRY_MS || 5000),
 }

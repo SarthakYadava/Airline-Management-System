@@ -3,21 +3,25 @@ const axios = require('axios');
 const { BookingRepository } = require('../repository/index');
 const { FLIGHT_SERVICE_PATH, INTERNAL_SERVICE_TOKEN } = require('../config/ServerConfig');
 const { ServiceError } = require('../utils/errors');
+const { publishBookingConfirmation } = require('../utils/booking-events');
 
 class BookingService{
 
     constructor({
         bookingRepository = new BookingRepository(),
         flightClient = axios,
-        flightServicePath = FLIGHT_SERVICE_PATH
+        flightServicePath = FLIGHT_SERVICE_PATH,
+        eventPublisher = publishBookingConfirmation
     } = {}){
         this.bookingRepository = bookingRepository;
         this.flightClient = flightClient;
         this.flightServicePath = flightServicePath;
+        this.eventPublisher = eventPublisher;
     }
 
     async createBooking(data){
         const seatInventoryURL = `${this.flightServicePath}/api/v1/flight/${data.flightId}/seats`;
+        const { userEmail, ...bookingData } = data;
         const requestConfig = {
             headers: {
                 'x-internal-service-token': INTERNAL_SERVICE_TOKEN
@@ -33,11 +37,23 @@ class BookingService{
             const flightData = response.data.data;
             const priceOfTheFlight = flightData.price;
             const totalCost = priceOfTheFlight * data.noOfSeats;
-            return await this.bookingRepository.create({
-                ...data,
+            const booking = await this.bookingRepository.create({
+                ...bookingData,
                 totalCost,
                 status: 'Booked'
             });
+            if(userEmail) {
+                try {
+                    await this.eventPublisher(booking, userEmail);
+                }
+                catch (eventError) {
+                    console.error(
+                        'Booking completed but notification event could not be published',
+                        eventError.message
+                    );
+                }
+            }
+            return booking;
         } 
         catch (error) {
             if(seatsReserved) {

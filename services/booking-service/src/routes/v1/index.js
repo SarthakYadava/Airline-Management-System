@@ -2,9 +2,7 @@ const express = require('express');
 
 const { BookingController } = require('../../controllers/index');
 const { BookingRequestValidator } = require('../../middlewares');
-// const { createChannel } = require('../../utils/messageQueue');
 
-// const channel = await createChannel();
 const bookingController = new BookingController();
 
 const router = express.Router();
@@ -19,6 +17,5 @@ router.post(
     bookingController.create
 );
 router.get('/booking', BookingRequestValidator.validateAuthenticatedUser, bookingController.all);
-router.post('/publish', bookingController.sendMessageToQueue);
 
 module.exports = router;

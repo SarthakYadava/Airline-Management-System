@@ -14,8 +14,8 @@ automated tests, and a simplified local development experience.
 | API Gateway | Routes client traffic and protects booking endpoints |
 | Auth Service | Handles account creation, sign-in, and token validation |
 | Flight Service | Manages cities, airports, aircraft, and flight inventory |
-| Booking Service | Creates bookings and updates available seats |
-| Notification Service | Stores and sends scheduled email notifications |
+| Booking Service | Creates bookings, updates available seats, and publishes confirmation events |
+| Notification Service | Consumes booking events and stores scheduled email notifications |
 
 ## Technology
 
@@ -42,6 +42,13 @@ The traveler-facing frontend includes:
 
 When the backend is unavailable, the frontend labels and displays preview data
 so the interface remains explorable without presenting it as a live response.
+
+## Booking Events
+
+Successful bookings publish persistent confirmation events to a durable
+RabbitMQ exchange. The notification service consumes them from a durable queue
+and creates pending notification tickets. Broker failures do not roll back a
+booking that has already been confirmed.
 
 ## Local Setup
 
@@ -115,4 +122,4 @@ npm test
 
 The current suite covers authentication and role sessions, request validation,
 flight schedule rules, pagination, API errors, airplane capacity, booking
-totals, and race-safe seat availability.
+totals, race-safe seat availability, event publication, and queue consumption.

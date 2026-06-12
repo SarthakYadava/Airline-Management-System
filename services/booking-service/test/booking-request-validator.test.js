@@ -39,7 +39,10 @@ test('rejects bookings without an authenticated user', () => {
 
 test('normalizes a valid booking request', () => {
     const request = {
-        headers: { 'x-user-id': '11' },
+        headers: {
+            'x-user-id': '11',
+            'x-user-email': 'traveler@example.com'
+        },
         body: { flightId: '3', noOfSeats: '2' }
     };
     const response = createResponse();
@@ -53,6 +56,7 @@ test('normalizes a valid booking request', () => {
 
     assert.equal(nextCalled, true);
     assert.equal(request.authenticatedUserId, 11);
+    assert.equal(request.authenticatedUserEmail, 'traveler@example.com');
     assert.deepEqual(request.body, { flightId: 3, noOfSeats: 2 });
 });
 

@@ -139,3 +139,79 @@ test('returns bookings for the authenticated user', async () => {
 
     assert.deepEqual(bookings, [{ id: 9, userId: 44, status: 'Booked' }]);
 });
+
+test('publishes a confirmation event after creating a booking', async () => {
+    let published;
+    const service = new BookingService({
+        bookingRepository: {
+            async create(data) {
+                return { id: 21, ...data };
+            }
+        },
+        flightClient: {
+            async patch() {
+                return {
+                    data: {
+                        data: {
+                            id: 3,
+                            price: 4500,
+                            totalSeats: 9
+                        }
+                    }
+                };
+            }
+        },
+        flightServicePath: 'http://flights.test',
+        async eventPublisher(booking, recipientEmail) {
+            published = { booking, recipientEmail };
+        }
+    });
+
+    const booking = await service.createBooking({
+        flightId: 3,
+        userId: 11,
+        userEmail: 'traveler@example.com',
+        noOfSeats: 1
+    });
+
+    assert.equal(booking.id, 21);
+    assert.equal(published.booking.id, 21);
+    assert.equal(published.recipientEmail, 'traveler@example.com');
+});
+
+test('keeps a completed booking when event publishing fails', async () => {
+    const service = new BookingService({
+        bookingRepository: {
+            async create(data) {
+                return { id: 22, ...data };
+            }
+        },
+        flightClient: {
+            async patch() {
+                return {
+                    data: {
+                        data: {
+                            id: 3,
+                            price: 4500,
+                            totalSeats: 9
+                        }
+                    }
+                };
+            }
+        },
+        flightServicePath: 'http://flights.test',
+        async eventPublisher() {
+            throw new Error('Broker unavailable');
+        }
+    });
+
+    const booking = await service.createBooking({
+        flightId: 3,
+        userId: 11,
+        userEmail: 'traveler@example.com',
+        noOfSeats: 1
+    });
+
+    assert.equal(booking.id, 22);
+    assert.equal(booking.status, 'Booked');
+});
