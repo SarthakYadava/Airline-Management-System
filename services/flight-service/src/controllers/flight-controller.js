@@ -74,8 +74,14 @@ const get = async (req, res) => {
 
 const all = async (req, res) => {
     try {
-        const response = await flightService.all_Flights(req.query);
-        return sendSuccess(res, SuccessCodes.OK, response, 'Successfully fetched flights');
+        const response = await flightService.all_Flights(req.flightQuery);
+        return sendSuccess(
+            res,
+            SuccessCodes.OK,
+            response.flights,
+            'Successfully fetched flights',
+            { pagination: response.pagination }
+        );
     }
     catch (error) {
         return sendError(res, error, 'Not able to fetch flights');

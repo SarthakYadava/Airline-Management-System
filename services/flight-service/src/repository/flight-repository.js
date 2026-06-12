@@ -141,13 +141,31 @@ class FlightRepository{
     async all_Flights(filter){
         try{
             const filterObject = this.#Filters(filter);
-            const sortDirection = filter.sort === 'price_desc' ? 'DESC' : 'ASC';
-            const flight = await Flights.findAll({
+            const sortOptions = {
+                recommended: [['price', 'ASC'], ['departureTime', 'ASC'], ['id', 'ASC']],
+                departure_asc: [['departureTime', 'ASC'], ['id', 'ASC']],
+                departure_desc: [['departureTime', 'DESC'], ['id', 'ASC']],
+                price_asc: [['price', 'ASC'], ['departureTime', 'ASC'], ['id', 'ASC']],
+                price_desc: [['price', 'DESC'], ['departureTime', 'ASC'], ['id', 'ASC']],
+                seats_desc: [['totalSeats', 'DESC'], ['price', 'ASC'], ['id', 'ASC']]
+            };
+            const { count, rows } = await Flights.findAndCountAll({
                 where: filterObject,
                 include: this.#Includes(),
-                order: [[filter.sort?.startsWith('price') ? 'price' : 'departureTime', sortDirection]]
+                order: sortOptions[filter.sort],
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+                distinct: true
             });
-            return flight;
+            return {
+                flights: rows,
+                pagination: {
+                    page: filter.page,
+                    limit: filter.limit,
+                    totalItems: count,
+                    totalPages: Math.ceil(count / filter.limit)
+                }
+            };
         }
         catch (error){
             console.log("Something went wrong in the repository layer");

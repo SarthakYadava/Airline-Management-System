@@ -107,3 +107,35 @@ test('returns a not found error when a flight does not exist', async () => {
             error.message === 'Flight not found'
     );
 });
+
+test('returns paginated flight search results', async () => {
+    const query = {
+        page: 2,
+        limit: 5,
+        sort: 'departure_desc'
+    };
+    const expected = {
+        flights: [{ id: 8 }],
+        pagination: {
+            page: 2,
+            limit: 5,
+            totalItems: 8,
+            totalPages: 2
+        }
+    };
+    let receivedQuery = null;
+    const service = new FlightService({
+        airplaneRepository: {},
+        flightRepository: {
+            async all_Flights(data) {
+                receivedQuery = data;
+                return expected;
+            }
+        }
+    });
+
+    const result = await service.all_Flights(query);
+
+    assert.deepEqual(receivedQuery, query);
+    assert.deepEqual(result, expected);
+});

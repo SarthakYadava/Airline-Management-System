@@ -17,13 +17,17 @@ const createHttpError = (statusCode, message, details = message) => {
     return error;
 };
 
-const sendSuccess = (res, statusCode, data, message) => {
-    return res.status(statusCode).json({
+const sendSuccess = (res, statusCode, data, message, meta) => {
+    const payload = {
         data,
         success: true,
         message,
         err: {}
-    });
+    };
+    if(meta) {
+        payload.meta = meta;
+    }
+    return res.status(statusCode).json(payload);
 };
 
 const sendError = (res, error, fallbackMessage) => {

@@ -6,6 +6,14 @@ type ApiResponse<T> = {
   data: T;
   success: boolean;
   message: string;
+  meta?: {
+    pagination?: {
+      page: number;
+      limit: number;
+      totalItems: number;
+      totalPages: number;
+    };
+  };
 };
 
 const readJson = async <T>(response: Response): Promise<T> => {
@@ -89,4 +97,3 @@ export const getBookings = async (token: string) => {
   const payload = await readJson<ApiResponse<Booking[]>>(response);
   return payload.data;
 };
-

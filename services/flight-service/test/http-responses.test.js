@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 
 const {
     createHttpError,
-    sendError
+    sendError,
+    sendSuccess
 } = require('../src/utils/http-responses');
 
 const createResponse = () => ({
@@ -57,4 +58,26 @@ test('unwraps repository errors and maps duplicate records', () => {
     assert.equal(response.statusCode, 409);
     assert.equal(response.body.message, 'Resource already exists');
     assert.deepEqual(response.body.err.details, ['flightNumber must be unique']);
+});
+
+test('includes optional response metadata', () => {
+    const response = createResponse();
+
+    sendSuccess(
+        response,
+        200,
+        [{ id: 1 }],
+        'Successfully fetched flights',
+        {
+            pagination: {
+                page: 1,
+                limit: 10,
+                totalItems: 1,
+                totalPages: 1
+            }
+        }
+    );
+
+    assert.equal(response.body.data.length, 1);
+    assert.equal(response.body.meta.pagination.totalItems, 1);
 });
