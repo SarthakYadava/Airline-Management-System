@@ -196,26 +196,22 @@ h1, h2, h3 { font-family: 'Libre Caslon Display', serif; font-weight: 400; }
 .section-heading p { max-width: 430px; line-height: 1.7; }
 .destination-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
 .destination-card { position: relative; min-height: 570px; overflow: hidden; color: #fff; background: #252d38; }
-.destination-card img { height: 100%; object-fit: cover; transition: transform .6s ease; }
-.destination-card:hover img { transform: scale(1.035); }
+.destination-card img { height: 100%; object-fit: cover; }
 .destination-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(9,15,24,.83)); }
 .destination-code { position: absolute; top: 1.4rem; right: 1.4rem; padding: .45rem .5rem; border: 1px solid rgba(255,255,255,.5); font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
 .destination-card > div:last-child { position: absolute; left: 1.7rem; right: 1.7rem; bottom: 1.7rem; }
 .destination-card h3 { margin: 0; font-size: 2.7rem; }
-.destination-card p { margin: .35rem 0 1.25rem; color: #e7eaed; }
-.destination-card button { width: 42px; height: 42px; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; color: #fff; background: transparent; }
+.destination-card p { margin: .35rem 0 0; color: #e7eaed; }
 
 .experience-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 760px; background: #ece7df; }
 .experience-image { min-height: 680px; }
 .experience-image img { height: 100%; object-fit: cover; object-position: center 20%; }
 .experience-copy { align-self: center; max-width: 650px; padding: clamp(3rem, 7vw, 7rem); }
 .experience-copy p { color: var(--muted); line-height: 1.8; font-size: 1.02rem; }
-.experience-points { margin: 2.6rem 0; border-top: 1px solid #cfcbc4; }
+.experience-points { margin: 2.6rem 0 0; border-top: 1px solid #cfcbc4; }
 .experience-points div { display: grid; grid-template-columns: 42px 1fr; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #cfcbc4; }
 .experience-points strong { color: var(--burgundy); font-size: .72rem; }
 .experience-points span { color: #414956; }
-.text-link { border: 0; padding: 0; color: var(--burgundy); background: transparent; font-weight: 700; }
-.text-link span { margin-left: .5rem; }
 
 .lounge-section { position: relative; min-height: 660px; color: #fff; }
 .lounge-section > img { position: absolute; inset: 0; height: 100%; object-fit: cover; }
@@ -223,10 +219,7 @@ h1, h2, h3 { font-family: 'Libre Caslon Display', serif; font-weight: 400; }
 .lounge-copy { position: relative; z-index: 1; width: min(550px, 70%); padding: 9rem clamp(1.5rem, 8vw, 9rem); }
 .light-kicker { color: #f1c48b; }
 .lounge-copy h2, .island-content h2 { color: #fff; }
-.lounge-copy p, .island-content p { margin: 1.2rem 0 2rem; color: #e4e8eb; line-height: 1.7; }
-.lounge-copy button, .island-content button {
-  border: 1px solid rgba(255,255,255,.75); padding: .85rem 1.1rem; color: #fff; background: transparent; font-weight: 700;
-}
+.lounge-copy p, .island-content p { margin: 1.2rem 0 0; color: #e4e8eb; line-height: 1.7; }
 .island-banner { min-height: 560px; display: flex; justify-content: flex-end; align-items: center; background-size: cover; background-position: center; }
 .island-content { width: min(560px, 90%); margin: 4rem clamp(1.5rem, 8vw, 9rem); padding: 3.5rem; color: #fff; background: rgba(14,25,39,.88); backdrop-filter: blur(8px); }
 

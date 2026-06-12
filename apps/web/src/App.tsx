@@ -466,7 +466,6 @@ function App() {
                 <div>
                   <h3>{destination.city}</h3>
                   <p>{destination.detail}</p>
-                  <button type="button" aria-label={`Explore ${destination.city}`}>↗</button>
                 </div>
               </article>
             ))}
@@ -489,7 +488,6 @@ function App() {
               <div><strong>02</strong><span>Clear support at every step</span></div>
               <div><strong>03</strong><span>A journey designed around you</span></div>
             </div>
-            <button className="text-link" type="button">Explore the experience <span>↗</span></button>
           </div>
         </section>
 
@@ -499,7 +497,6 @@ function App() {
             <span className="section-kicker light-kicker">Before you fly</span>
             <h2>Make the airport part of the journey.</h2>
             <p>Quiet spaces, considered design, and time to settle in before departure.</p>
-            <button type="button">Discover lounge access</button>
           </div>
         </section>
 
@@ -508,7 +505,6 @@ function App() {
             <span className="section-kicker light-kicker">Seasonal escapes</span>
             <h2>Leave the familiar far behind.</h2>
             <p>Explore island routes and warm-weather journeys selected for the months ahead.</p>
-            <button type="button">Find your escape <span>↗</span></button>
           </div>
         </section>
       </main>
