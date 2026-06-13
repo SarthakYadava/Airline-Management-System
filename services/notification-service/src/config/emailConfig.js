@@ -2,12 +2,18 @@ const nodemailer = require('nodemailer');
 
 const { EMAIL_ID, EMAIL_PASS } = require('./serverConfig');
 
-const sender = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: EMAIL_ID,
-        pass: EMAIL_PASS
-    }
-});
+const isEmailConfigured = Boolean(EMAIL_ID && EMAIL_PASS);
+const sender = isEmailConfigured
+    ? nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: EMAIL_ID,
+            pass: EMAIL_PASS
+        }
+    })
+    : null;
 
-module.exports = sender;
+module.exports = {
+    isEmailConfigured,
+    sender
+};

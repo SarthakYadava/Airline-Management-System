@@ -119,6 +119,7 @@ services:
       BROKER_RETRY_MS: 5000
       EMAIL_ID: ${EMAIL_ID:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
+      EMAIL_JOB_SCHEDULE: ${EMAIL_JOB_SCHEDULE:-*/1 * * * *}
     depends_on:
       mysql:
         condition: service_healthy

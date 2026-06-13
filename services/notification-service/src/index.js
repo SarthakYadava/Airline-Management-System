@@ -5,7 +5,8 @@ const app = express();
 const { PORT } = require('./config/serverConfig');
 const db = require('./models/index');
 
-const jobs = require('./utils/job');
+const { setupJobs } = require('./utils/job');
+const { isEmailConfigured } = require('./config/emailConfig');
 const ticketController = require('./controllers/ticket-controller');
 const { subscribeMessage, createChannel } = require('./utils/messageQueue');
 const { REMINDER_BINDING_KEY, BROKER_RETRY_MS } = require('./config/serverConfig');
@@ -19,7 +20,11 @@ const setupAndStartServer = async () => {
     app.get('/health', async (req, res) => {
         try {
             await db.sequelize.authenticate();
-            return res.status(200).json({ service: 'notification-service', status: 'ok' });
+            return res.status(200).json({
+                service: 'notification-service',
+                status: 'ok',
+                emailDelivery: isEmailConfigured ? 'configured' : 'disabled'
+            });
         }
         catch (error) {
             return res.status(503).json({ service: 'notification-service', status: 'unavailable' });
@@ -45,6 +50,7 @@ const setupAndStartServer = async () => {
     };
 
     connectToBroker();
+    setupJobs();
 }
 
 setupAndStartServer()

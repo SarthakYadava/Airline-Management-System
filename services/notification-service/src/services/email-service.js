@@ -1,9 +1,12 @@
-const sender = require('../config/emailConfig');
+const { sender } = require('../config/emailConfig');
 const TicketRepository = require('../repository/ticket-repository');
 
 const ticketRepository = new TicketRepository()
 
 const sendBasicEmail = (mailFrom, mailTo, mailSubject, mailBody) => {
+    if(!sender) {
+        throw new Error('Email delivery is not configured');
+    }
     return sender.sendMail({
         from: mailFrom,
         to: mailTo,
@@ -12,7 +15,7 @@ const sendBasicEmail = (mailFrom, mailTo, mailSubject, mailBody) => {
     });
 }
 
-const fetchPendingEmails = async (timestamp) => {
+const fetchPendingEmails = async () => {
     try {
         const response = await ticketRepository.get({status: "PENDING"});  
         return response;
