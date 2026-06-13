@@ -43,12 +43,27 @@ The traveler-facing frontend includes:
 When the backend is unavailable, the frontend labels and displays preview data
 so the interface remains explorable without presenting it as a live response.
 
+## Screenshots
+
+### Flight Search
+
+![SkyRoute flight search](docs/screenshots/home-search.png)
+
+### Management Dashboard
+
+![SkyRoute management dashboard](docs/screenshots/management-dashboard.png)
+
 ## Booking Events
 
 Successful bookings publish persistent confirmation events to a durable
 RabbitMQ exchange. The notification service consumes them from a durable queue
 and creates pending notification tickets. Broker failures do not roll back a
 booking that has already been confirmed.
+
+The scheduled email worker starts when `EMAIL_ID` and `EMAIL_PASS` are
+configured. Without those values, notification tickets remain pending and the
+service reports email delivery as disabled while continuing to process booking
+events normally.
 
 ## Local Setup
 
@@ -123,3 +138,7 @@ npm test
 The current suite covers authentication and role sessions, request validation,
 flight schedule rules, pagination, API errors, airplane capacity, booking
 totals, race-safe seat availability, event publication, and queue consumption.
+The repository currently includes 42 passing backend tests.
+
+Portfolio-ready resume bullets are available in
+[docs/RESUME_BULLETS.md](docs/RESUME_BULLETS.md).
